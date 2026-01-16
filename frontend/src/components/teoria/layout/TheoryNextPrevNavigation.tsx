@@ -1,0 +1,46 @@
+import { Box, Button } from "@mui/material";
+import { ArrowBack, ArrowForward } from "@mui/icons-material";
+import { useLocation, useNavigate } from "react-router-dom";
+import { theoryRoutes } from "./TheoryRoutes";
+
+export default function TheoryNextPrevNavigation() {
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const currentIndex = theoryRoutes.findIndex(
+    (r) => r.path === location.pathname
+  );
+
+  if (currentIndex === -1) return null;
+
+  const prev = theoryRoutes[currentIndex - 1];
+  const next = theoryRoutes[currentIndex + 1];
+
+  return (
+    <Box
+      sx={{
+        display: "flex",
+        justifyContent: "space-between",
+        mt: 6,
+      }}
+    >
+      {prev ? (
+        <Button startIcon={<ArrowBack />} onClick={() => navigate(prev.path)}>
+          {prev.label}
+        </Button>
+      ) : (
+        <span />
+      )}
+
+      {next && (
+        <Button
+          endIcon={<ArrowForward />}
+          variant="contained"
+          onClick={() => navigate(next.path)}
+        >
+          {next.label}
+        </Button>
+      )}
+    </Box>
+  );
+}
