@@ -3,12 +3,15 @@ import { ArrowBack, ArrowForward } from "@mui/icons-material";
 import { useLocation, useNavigate } from "react-router-dom";
 import { theoryRoutes } from "./TheoryRoutes";
 
-export default function TheoryNextPrevNavigation() {
+export default function TheoryNextPrevNavigation({
+  margin_top = 6,
+  margin_bottom = 0,
+}) {
   const location = useLocation();
   const navigate = useNavigate();
 
   const currentIndex = theoryRoutes.findIndex(
-    (r) => r.path === location.pathname
+    (r) => r.path === location.pathname,
   );
 
   if (currentIndex === -1) return null;
@@ -21,7 +24,8 @@ export default function TheoryNextPrevNavigation() {
       sx={{
         display: "flex",
         justifyContent: "space-between",
-        mt: 6,
+        mt: margin_top,
+        mb: margin_bottom,
       }}
     >
       {prev ? (

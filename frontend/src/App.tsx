@@ -13,6 +13,7 @@ import RateiERisconti from "./components/teoria/pages/RateiRisconti";
 import LeasingFinanziarioTheory from "./components/teoria/pages/LeasingFinanziario";
 import ImmobilizzazioniTheory from "./components/teoria/pages/Immobilizzazioni";
 import Indice from "./components/teoria/pages/Indice";
+import AumentoCapitaleSocialeTheory from "./components/teoria/pages/AumentoCapitaleSociale";
 
 export default function App() {
   return (
@@ -32,6 +33,10 @@ export default function App() {
           <Route
             path="immobilizzazioni-avanzate"
             element={<ImmobilizzazioniTheory />}
+          />
+          <Route
+            path="aumento-capitale-sociale"
+            element={<AumentoCapitaleSocialeTheory />}
           />
           {/* future:
           <Route path="analytic-accounting" element={<AnalyticAccountingTheory />} />

@@ -19,4 +19,8 @@ export const theoryRoutes = [
     path: "/teoria/immobilizzazioni-avanzate",
     label: "Immobilizzazioni avanzate",
   },
+  {
+    path: "/teoria/aumento-capitale-sociale",
+    label: "Aumento di Capitale Sociale",
+  },
 ];

@@ -27,6 +27,7 @@ export default function TheoryLayout() {
               mt: 2,
             }}
           >
+            <TheoryNextPrevNavigation margin_bottom={3} margin_top={0} />
             <Outlet />
 
             {/* NAVIGAZIONE FINALE */}

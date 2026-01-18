@@ -24,6 +24,10 @@ const links = [
     label: "Immobilizzazioni avanzate",
     to: "/teoria/immobilizzazioni-avanzate",
   },
+  {
+    label: "Aumento di Capitale Sociale",
+    to: "/teoria/aumento-capitale-sociale",
+  },
 ];
 
 export default function TheorySidebar() {
