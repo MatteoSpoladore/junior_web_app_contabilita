@@ -10,8 +10,9 @@ export default function TheoryBox({
   return (
     <Box
       sx={{
-        borderLeft: "5px solid #1976d2",
-        backgroundColor: "#e3f2fd",
+        borderLeft: "5px solid var(--info-accent)",
+        backgroundColor: "var(--info-bg)",
+        color: "var(--text-main)",
         p: 2.5,
         mb: 4,
         borderRadius: 2,

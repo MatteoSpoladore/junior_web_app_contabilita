@@ -32,7 +32,6 @@ const links = [
 
 export default function TheorySidebar() {
   const [collapsed, setCollapsed] = useState(false);
-
   const width = collapsed ? SIDEBAR_COLLAPSED_WIDTH : SIDEBAR_WIDTH;
 
   return (
@@ -44,15 +43,20 @@ export default function TheorySidebar() {
         width,
         height: `calc(100vh - ${HEADER_HEIGHT}px)`,
         transition: "width 0.3s",
-        backgroundColor: "#f5f7fa",
-        borderRight: "1px solid #e0e0e0",
+        backgroundColor: "var(--bg-box)",
+        borderRight: "1px solid var(--border-color)",
         zIndex: 1200,
         overflowY: "auto",
+        color: "var(--text-main)",
       }}
     >
       {/* Toggle */}
       <Box sx={{ display: "flex", justifyContent: "flex-end", p: 1 }}>
-        <IconButton size="small" onClick={() => setCollapsed(!collapsed)}>
+        <IconButton
+          size="small"
+          onClick={() => setCollapsed(!collapsed)}
+          sx={{ color: "var(--text-main)" }}
+        >
           {collapsed ? <ChevronRight /> : <ChevronLeft />}
         </IconButton>
       </Box>
@@ -69,35 +73,22 @@ export default function TheorySidebar() {
               to={link.to}
               sx={{
                 "&.active": {
-                  backgroundColor: "#e3f2fd",
+                  backgroundColor: "var(--active-bg)",
                   fontWeight: 600,
                 },
+                "&:hover": {
+                  backgroundColor: "var(--hover-bg)",
+                },
                 justifyContent: collapsed ? "center" : "flex-start",
-                whiteSpace: "nowrap",
-                overflow: "hidden",
-                alignItems: "center",
                 px: 2,
+                color: "var(--text-main)",
               }}
             >
-              {/* Solo testo quando aperto */}
-              <Collapse
-                orientation="horizontal"
-                in={!collapsed}
-                mountOnEnter
-                unmountOnExit
-              >
+              <Collapse orientation="horizontal" in={!collapsed}>
                 <ListItemText
                   primary={link.label}
-                  sx={{
-                    flex: "0 0 auto", // non ridimensionabile
-                  }}
                   primaryTypographyProps={{
                     noWrap: true,
-                    sx: {
-                      // width: 140, // larghezza definitiva della sidebar aperta
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                    },
                   }}
                 />
               </Collapse>

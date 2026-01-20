@@ -5,20 +5,27 @@ export default function TheoryHeader() {
   const navigate = useNavigate();
 
   return (
-    <AppBar position="fixed" sx={{ zIndex: (t) => t.zIndex.drawer + 1 }}>
+    <AppBar
+      position="fixed"
+      sx={{
+        zIndex: (t) => t.zIndex.drawer + 1,
+        backgroundColor: "var(--bg-box)",
+        color: "var(--text-main)",
+        borderBottom: "1px solid var(--border-color)",
+      }}
+      elevation={0}
+    >
       <Toolbar>
-        <Typography
-          variant="h6"
-          component="div"
-          sx={{ flexGrow: 1, fontWeight: 600 }}
-        >
+        <Typography variant="h6" sx={{ flexGrow: 1, fontWeight: 600 }}>
           Teoria – Contabilità
         </Typography>
 
         <Button
-          color="inherit"
           onClick={() => navigate("/home")}
-          sx={{ fontWeight: 600 }}
+          sx={{
+            color: "var(--text-main)",
+            fontWeight: 600,
+          }}
         >
           Torna alla Homepage
         </Button>
