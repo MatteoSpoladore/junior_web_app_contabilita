@@ -36,7 +36,7 @@ export async function login({
 }: {
   username: string;
   password: string;
-}): Promise<boolean> {
+}): Promise<void> {
   try {
     const response = await axios.post(`${BASE_URL}/login/`, {
       username,
@@ -46,11 +46,9 @@ export async function login({
     const { access, refresh } = response.data;
     localStorage.setItem("access", access);
     localStorage.setItem("refresh", refresh);
-
-    return true;
   } catch (error: any) {
     console.error("Errore login:", error.response?.data || error);
-    return false;
+    throw error; // ✅ FONDAMENTALE
   }
 }
 
