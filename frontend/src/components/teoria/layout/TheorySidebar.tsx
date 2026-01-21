@@ -77,7 +77,7 @@ export default function TheorySidebar() {
           >
             <ListItemButton
               component={NavLink}
-              to={link.path}
+              to={`/teoria/${link.path}`}
               sx={{
                 "&.active": {
                   backgroundColor: "var(--active-bg)",

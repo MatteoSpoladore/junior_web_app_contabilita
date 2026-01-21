@@ -10,9 +10,12 @@ export default function TheoryNextPrevNavigation({
   const location = useLocation();
   const navigate = useNavigate();
 
-  const currentIndex = theoryRoutes.findIndex(
-    (r) => r.path === location.pathname,
-  );
+  const currentPath = location.pathname.split("/").pop();
+
+  const currentIndex = theoryRoutes.findIndex((r) => r.path === currentPath);
+  // const currentIndex = theoryRoutes.findIndex(
+  //   (r) => r.path === location.pathname,
+  // );
 
   if (currentIndex === -1) return null;
 
@@ -29,7 +32,10 @@ export default function TheoryNextPrevNavigation({
       }}
     >
       {prev ? (
-        <Button startIcon={<ArrowBack />} onClick={() => navigate(prev.path)}>
+        <Button
+          startIcon={<ArrowBack />}
+          onClick={() => navigate(`/teoria/${prev.path}`)}
+        >
           {prev.label}
         </Button>
       ) : (
@@ -40,7 +46,7 @@ export default function TheoryNextPrevNavigation({
         <Button
           endIcon={<ArrowForward />}
           variant="contained"
-          onClick={() => navigate(next.path)}
+          onClick={() => navigate(`/teoria/${next.path}`)}
         >
           {next.label}
         </Button>
