@@ -19,8 +19,7 @@ export default function GridTheoryBackground({ children }) {
             linear-gradient(to right, var(--grid-color) 1px, transparent 1px),
             linear-gradient(to bottom, var(--grid-color) 1px, transparent 1px)
           `,
-          animation: "moveGrid 12s linear infinite",
-          opacity: 0.5,
+          animation: "moveGrid 10s linear infinite",
           zIndex: 0,
         },
       }}

@@ -41,13 +41,16 @@ export default function TheoryTable({
           </Typography>
         )}
 
-        <Table size="small">
+        <Table
+          size="small"
+          sx={{
+            "& th, & td": {
+              color: "var(--text-main)",
+            },
+          }}
+        >
           <TableHead>
-            <TableRow
-              sx={{
-                backgroundColor: "var(--table-head-bg)",
-              }}
-            >
+            <TableRow sx={{ backgroundColor: "var(--table-head-bg)" }}>
               <TableCell sx={{ fontWeight: 600 }}>Conto Dare</TableCell>
               <TableCell sx={{ fontWeight: 600 }}>Conto Avere</TableCell>
               <TableCell sx={{ fontWeight: 600 }} align="right">
