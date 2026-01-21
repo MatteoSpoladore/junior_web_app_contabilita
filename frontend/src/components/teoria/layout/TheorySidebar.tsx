@@ -17,6 +17,7 @@ const HEADER_HEIGHT = 64;
 
 const links = [
   { label: "Indice", to: "/teoria/indice" },
+  { label: "Guida ai contenuti", to: "/teoria/guida-ai-contenuti" },
   { label: "Contabilità generale", to: "/teoria/generale" },
   { label: "Ratei e Risconti", to: "/teoria/ratei-e-risconti" },
   { label: "Leasing finanziario", to: "/teoria/leasing" },
@@ -27,6 +28,11 @@ const links = [
   {
     label: "Aumento di Capitale Sociale",
     to: "/teoria/aumento-capitale-sociale",
+  },
+
+  {
+    label: "Guida Codice",
+    to: "/teoria/guida-codice",
   },
 ];
 

@@ -4,6 +4,10 @@ export const theoryRoutes = [
     label: "Indice",
   },
   {
+    path: "/teoria/guida-ai-contenuti",
+    label: "Guida ai contenuti",
+  },
+  {
     path: "/teoria/generale",
     label: "Contabilità generale",
   },
@@ -22,5 +26,10 @@ export const theoryRoutes = [
   {
     path: "/teoria/aumento-capitale-sociale",
     label: "Aumento di Capitale Sociale",
+  },
+
+  {
+    path: "/teoria/guida-codice",
+    label: "Guida Codice",
   },
 ];

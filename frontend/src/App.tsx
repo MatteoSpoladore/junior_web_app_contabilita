@@ -14,7 +14,8 @@ import LeasingFinanziarioTheory from "./components/teoria/pages/LeasingFinanziar
 import ImmobilizzazioniTheory from "./components/teoria/pages/Immobilizzazioni";
 import Indice from "./components/teoria/pages/Indice";
 import AumentoCapitaleSocialeTheory from "./components/teoria/pages/AumentoCapitaleSociale";
-
+import GuidaCodice from "./components/teoria/pages/GuidaCodice";
+import GuidaContenuti from "./components/teoria/pages/GuidaContenuti";
 import { ThemeProvider } from "./components/teoria/layout/ThemeContext";
 
 import "./App.css";
@@ -48,6 +49,7 @@ export default function App() {
           >
             <Route index element={<Indice />} />
             <Route path="indice" element={<Indice />} />
+            <Route path="guida-ai-contenuti" element={<GuidaContenuti />} />
             <Route path="generale" element={<GeneralAccountingTheory />} />
             <Route path="ratei-e-risconti" element={<RateiERisconti />} />
             <Route path="leasing" element={<LeasingFinanziarioTheory />} />
@@ -59,6 +61,7 @@ export default function App() {
               path="aumento-capitale-sociale"
               element={<AumentoCapitaleSocialeTheory />}
             />
+            <Route path="guida-codice" element={<GuidaCodice />} />
           </Route>
 
           {/* Auth senza ThemeProvider */}
