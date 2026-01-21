@@ -10,31 +10,32 @@ import {
 import { ChevronLeft, ChevronRight } from "@mui/icons-material";
 import { NavLink } from "react-router-dom";
 import { useState } from "react";
+import { theoryRoutes } from "./TheoryRoutes";
 
 const SIDEBAR_WIDTH = 240;
 const SIDEBAR_COLLAPSED_WIDTH = 60;
 const HEADER_HEIGHT = 64;
 
-const links = [
-  { label: "Indice", to: "/teoria/indice" },
-  { label: "Guida ai contenuti", to: "/teoria/guida-ai-contenuti" },
-  { label: "Contabilità generale", to: "/teoria/generale" },
-  { label: "Ratei e Risconti", to: "/teoria/ratei-e-risconti" },
-  { label: "Leasing finanziario", to: "/teoria/leasing" },
-  {
-    label: "Immobilizzazioni avanzate",
-    to: "/teoria/immobilizzazioni-avanzate",
-  },
-  {
-    label: "Aumento di Capitale Sociale",
-    to: "/teoria/aumento-capitale-sociale",
-  },
+// const links = [
+//   { label: "Indice", to: "/teoria/indice" },
+//   { label: "Guida ai contenuti", to: "/teoria/guida-ai-contenuti" },
+//   { label: "Contabilità generale", to: "/teoria/generale" },
+//   { label: "Ratei e Risconti", to: "/teoria/ratei-e-risconti" },
+//   { label: "Leasing finanziario", to: "/teoria/leasing" },
+//   {
+//     label: "Immobilizzazioni avanzate",
+//     to: "/teoria/immobilizzazioni-avanzate",
+//   },
+//   {
+//     label: "Aumento di Capitale Sociale",
+//     to: "/teoria/aumento-capitale-sociale",
+//   },
 
-  {
-    label: "Guida Codice",
-    to: "/teoria/guida-codice",
-  },
-];
+//   {
+//     label: "Guida Codice",
+//     to: "/teoria/guida-codice",
+//   },
+// ];
 
 export default function TheorySidebar() {
   const [collapsed, setCollapsed] = useState(false);
@@ -68,6 +69,37 @@ export default function TheorySidebar() {
       </Box>
 
       <List>
+        {theoryRoutes.map((link) => (
+          <Tooltip
+            key={link.path}
+            title={collapsed ? link.label : ""}
+            placement="right"
+          >
+            <ListItemButton
+              component={NavLink}
+              to={link.path}
+              sx={{
+                "&.active": {
+                  backgroundColor: "var(--active-bg)",
+                  fontWeight: 600,
+                },
+                "&:hover": { backgroundColor: "var(--hover-bg)" },
+                justifyContent: collapsed ? "center" : "flex-start",
+                px: 2,
+                color: "var(--text-main)",
+              }}
+            >
+              <Collapse orientation="horizontal" in={!collapsed}>
+                <ListItemText
+                  primary={link.label}
+                  primaryTypographyProps={{ noWrap: true }}
+                />
+              </Collapse>
+            </ListItemButton>
+          </Tooltip>
+        ))}
+      </List>
+      {/* <List>
         {links.map((link) => (
           <Tooltip
             key={link.to}
@@ -101,7 +133,7 @@ export default function TheorySidebar() {
             </ListItemButton>
           </Tooltip>
         ))}
-      </List>
+      </List> */}
     </Box>
   );
 }
