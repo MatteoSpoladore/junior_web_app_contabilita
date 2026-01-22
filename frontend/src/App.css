@@ -71,3 +71,59 @@ body,
   background-color: var(--bg-main);
   color: var(--text-main);
 }
+
+@media print {
+  /* === DISATTIVA GRID THEORY BACKGROUND === */
+
+  /* Wrapper principale */
+  body,
+  #root {
+    background: none !important;
+  }
+
+  /* Qualsiasi pseudo-elemento decorativo */
+  body::before,
+  body::after,
+  #root::before,
+  #root::after,
+  div::before {
+    content: none !important;
+    background: none !important;
+    background-image: none !important;
+    animation: none !important;
+  }
+
+  /* Nasconde elementi di layout */
+  header,
+  aside,
+  nav,
+  button,
+  .MuiAppBar-root,
+  .MuiIconButton-root,
+  .MuiButton-root {
+    display: none !important;
+  }
+
+  /* Reset visual */
+  * {
+    box-shadow: none !important;
+    color: #000 !important;
+    background: transparent !important;
+  }
+
+  /* Tipografia */
+  html,
+  body {
+    background: #fff !important;
+    font-size: 12pt;
+    line-height: 1.6;
+  }
+
+  /* Container MUI */
+  .MuiContainer-root {
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+  }
+}
