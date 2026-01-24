@@ -6,6 +6,7 @@ import ImmobilizzazioniTheory from "../pages/Immobilizzazioni";
 import AumentoCapitaleSocialeTheory from "../pages/AumentoCapitaleSociale";
 import GuidaCodice from "../pages/GuidaCodice";
 import GuidaContenuti from "../pages/GuidaContenuti";
+import AcquistoEVenditaMerciIVA from "../pages/AcqVen";
 
 export interface TheoryRoute {
   path: string;
@@ -24,6 +25,11 @@ export const theoryRoutes: TheoryRoute[] = [
     path: "generale",
     label: "Contabilità generale",
     component: GeneralAccountingTheory,
+  },
+  {
+    path: "acquisto-e-vendita",
+    label: "Acquisto e Vendita",
+    component: AcquistoEVenditaMerciIVA,
   },
   {
     path: "ratei-e-risconti",
