@@ -7,6 +7,7 @@ import AumentoCapitaleSocialeTheory from "../pages/AumentoCapitaleSociale";
 import GuidaCodice from "../pages/GuidaCodice";
 import GuidaContenuti from "../pages/GuidaContenuti";
 import AcquistoEVenditaMerciIVA from "../pages/AcqVen";
+import ScrittureAssestamentoTheory from "../pages/AssestamentoTheory";
 
 export interface TheoryRoute {
   path: string;
@@ -30,6 +31,11 @@ export const theoryRoutes: TheoryRoute[] = [
     path: "acquisto-e-vendita",
     label: "Acquisto e Vendita",
     component: AcquistoEVenditaMerciIVA,
+  },
+  {
+    path: "assestamento",
+    label: "Scritture di assestamento",
+    component: ScrittureAssestamentoTheory,
   },
   {
     path: "ratei-e-risconti",
