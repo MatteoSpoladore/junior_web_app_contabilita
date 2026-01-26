@@ -8,6 +8,7 @@ import GuidaCodice from "../pages/GuidaCodice";
 import GuidaContenuti from "../pages/GuidaContenuti";
 import AcquistoEVenditaMerciIVA from "../pages/AcqVen";
 import ScrittureAssestamentoTheory from "../pages/AssestamentoTheory";
+import MutuiTheory from "../pages/MutuiTheory";
 
 export interface TheoryRoute {
   path: string;
@@ -31,6 +32,11 @@ export const theoryRoutes: TheoryRoute[] = [
     path: "acquisto-e-vendita",
     label: "Acquisto e Vendita",
     component: AcquistoEVenditaMerciIVA,
+  },
+  {
+    path: "finanziamenti-e-mutui",
+    label: "Finanziamenti e mutui",
+    component: MutuiTheory,
   },
   {
     path: "assestamento",
