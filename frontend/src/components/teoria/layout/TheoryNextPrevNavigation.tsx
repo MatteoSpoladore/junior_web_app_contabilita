@@ -1,7 +1,7 @@
 import { Box, Button } from "@mui/material";
 import { ArrowBack, ArrowForward } from "@mui/icons-material";
 import { useLocation, useNavigate } from "react-router-dom";
-import { theoryRoutes } from "./TheoryRoutes";
+import { theoryRoutes } from "../route/TheoryRoutes";
 
 export default function TheoryNextPrevNavigation({
   margin_top = 6,

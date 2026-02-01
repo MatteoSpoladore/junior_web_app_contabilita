@@ -1,6 +1,6 @@
 import { Box, List, ListItemButton, ListItemText } from "@mui/material";
 import { NavLink } from "react-router-dom";
-import { theoryRoutes } from "./TheoryRoutes";
+import { theoryRoutes } from "../route/TheoryRoutes";
 
 const SIDEBAR_WIDTH = 240;
 const HEADER_HEIGHT = 64;

@@ -5,7 +5,7 @@ import MenuBookIcon from "@mui/icons-material/MenuBook";
 import ThemeToggle from "../components/teoria/layout/ThemeToggle";
 import GridTheoryBackground from "../components/teoria/layout/GridTheoryBackground";
 import { useTheme } from "../components/teoria/layout/ThemeContext";
-import { theoryRoutes } from "../components/teoria/layout/TheoryRoutes";
+import { theoryRoutes } from "../components/teoria/route/TheoryRoutes";
 
 export default function Homepage() {
   const navigate = useNavigate();

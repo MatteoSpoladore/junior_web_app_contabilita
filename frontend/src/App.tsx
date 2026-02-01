@@ -9,7 +9,7 @@ import Homepage from "./pages/Hompage";
 
 import TheoryLayout from "./components/teoria/layout/TheoryLayout";
 import { ThemeProvider } from "./components/teoria/layout/ThemeContext";
-import { theoryRoutes } from "./components/teoria/layout/TheoryRoutes";
+import { theoryRoutes } from "./components/teoria/route/TheoryRoutes";
 
 import "./App.css";
 

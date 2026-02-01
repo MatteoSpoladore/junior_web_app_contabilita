@@ -9,6 +9,7 @@ import GuidaContenuti from "../pages/GuidaContenuti";
 import AcquistoEVenditaMerciIVA from "../pages/AcqVen";
 import ScrittureAssestamentoTheory from "../pages/AssestamentoTheory";
 import MutuiTheory from "../pages/MutuiTheory";
+import ContoEconomicoTheory from "../pages/ContoEconomicoTheory";
 
 export interface TheoryRoute {
   path: string;
@@ -27,6 +28,11 @@ export const theoryRoutes: TheoryRoute[] = [
     path: "generale",
     label: "Contabilità generale",
     component: GeneralAccountingTheory,
+  },
+  {
+    path: "conto-economico",
+    label: "Conto Economico",
+    component: ContoEconomicoTheory,
   },
   {
     path: "acquisto-e-vendita",
