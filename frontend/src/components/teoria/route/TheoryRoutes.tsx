@@ -10,6 +10,7 @@ import AcquistoEVenditaMerciIVA from "../pages/AcqVen";
 import ScrittureAssestamentoTheory from "../pages/AssestamentoTheory";
 import MutuiTheory from "../pages/MutuiTheory";
 import ContoEconomicoTheory from "../pages/ContoEconomicoTheory";
+import StatoPatrimonialeTheory from "../pages/StatoPatrimoniale";
 
 export interface TheoryRoute {
   path: string;
@@ -33,6 +34,11 @@ export const theoryRoutes: TheoryRoute[] = [
     path: "conto-economico",
     label: "Conto Economico",
     component: ContoEconomicoTheory,
+  },
+  {
+    path: "stato-patrimoniale",
+    label: "Stato Patrimoniale",
+    component: StatoPatrimonialeTheory,
   },
   {
     path: "acquisto-e-vendita",
