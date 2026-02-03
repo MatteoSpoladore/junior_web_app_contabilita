@@ -62,7 +62,7 @@ export default function PrivateLayout() {
           ml: sidebarOpen ? `${DRAWER_WIDTH}px` : `${DRAWER_COLLAPSED_WIDTH}px`,
           transition: `margin-left ${LAYOUT_TRANSITION}`,
           overflowX: "hidden",
-          p: 3,
+          pt: 2,
         }}
       >
         <Fade key={esercizioSelezionato?.id ?? "empty"} in timeout={300}>

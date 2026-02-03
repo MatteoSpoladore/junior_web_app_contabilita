@@ -73,7 +73,7 @@ export default function ScrittureTable({
   ];
 
   return (
-    <Paper sx={{ height: "55vh", width: "100%" }} elevation={3}>
+    <Paper sx={{ height: "50vh", width: "100%" }} elevation={3}>
       {/* <Fade in key={rows.length} timeout={300}> */}
       <Box sx={{ height: "100%" }}>
         <DataGrid
