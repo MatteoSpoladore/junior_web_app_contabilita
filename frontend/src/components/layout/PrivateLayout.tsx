@@ -39,7 +39,7 @@ export default function PrivateLayout() {
   }, []);
 
   if (loading) {
-    return <Box p={3}>Caricamento dati...</Box>;
+    return <Box p={3}>Caricamento...</Box>;
   }
 
   return (
