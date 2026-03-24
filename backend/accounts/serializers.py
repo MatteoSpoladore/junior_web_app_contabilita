@@ -38,7 +38,9 @@ class RegisterSerializer(serializers.ModelSerializer):
         return data
 
     def create(self, validated_data):
-        validated_data.pop("confirm_password")
+        # Usare None come secondo argomento evita il KeyError se la chiave manca
+        validated_data.pop("confirm_password", None)
+
         return User.objects.create_user(
             username=validated_data["username"],
             email=validated_data["email"],
