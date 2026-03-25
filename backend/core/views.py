@@ -6,6 +6,7 @@ from .serializers import (
     ScritturaSerializer,
 )
 from rest_framework.permissions import IsAuthenticated
+from django.db.models import Sum, Q
 
 
 class EsercizioViewSet(viewsets.ModelViewSet):
@@ -20,16 +21,44 @@ class EsercizioViewSet(viewsets.ModelViewSet):
 
 
 class MastrinoViewSet(viewsets.ModelViewSet):
-    queryset = Mastrino.objects.all()
+    permission_classes = [IsAuthenticated]
     serializer_class = MastrinoSerializer
+
+    # nuovo
+    def get_queryset(self):
+        queryset = Mastrino.objects.all()
+        esercizio_id = self.request.query_params.get("esercizio")
+
+        if esercizio_id:
+            # Verifica che l'esrcizio esista e sia dell'utente loggato
+            if not Esercizio.objects.filter(
+                id=esercizio_id, user=self.request.user
+            ).exits():
+                return (
+                    Matrino.objects.none()
+                )  # ritorna vuoto se accesso non autorizzato
+            queryset = queryset.annotate(
+                tot_dare=Sum(
+                    "movimenti_dare__importo",
+                    filter=Q(movimenti_dare__esercizio_id=esercizio_id),
+                ),
+                tot_avere=Sum(
+                    "movimenti_avere__importo",
+                    filter=Q(movimenti_avere_esercizio_id=esercizio_id),
+                ),
+            )
+            return queryset
 
 
 class ScritturaViewSet(viewsets.ModelViewSet):
-    queryset = Scrittura.objects.all()
+
     serializer_class = ScritturaSerializer
+    permission_classes = [IsAuthenticated]  # blocco per solo se sei autenticato
 
     def get_queryset(self):
-        queryset = Scrittura.objects.all()
+        queryset = Scrittura.objects.filter(
+            esercizio__user=self.request.user
+        )  # solo le tue scritture
         esercizio_id = self.request.query_params.get("esercizio")
         if esercizio_id:
             queryset = queryset.filter(esercizio_id=esercizio_id)

@@ -26,12 +26,13 @@ class Mastrino(models.Model):
     codice = models.CharField(max_length=20, unique=True)
     nome = models.CharField(max_length=200)
 
+    # rimossi e calcolati da viewset
     # Saldi denormalizzati (aggiornati via Signals)
-    saldo_dare = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
-    saldo_avere = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
+    # saldo_dare = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
+    # saldo_avere = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
 
-    # Questo è la differenza calcolata (utile per filtri veloci)
-    saldo_finale = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
+    # # Questo è la differenza calcolata (utile per filtri veloci)
+    # saldo_finale = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
 
     class Meta:
         ordering = ["codice"]
@@ -39,11 +40,12 @@ class Mastrino(models.Model):
     def __str__(self):
         return f"{self.codice} - {self.nome}"
 
-    def ricalcola_saldo_netto(self):
-        """Metodo helper per aggiornare il netto"""
-        self.saldo_finale = self.saldo_dare - self.saldo_avere
-        # Nota: Non chiamiamo save() qui per evitare ricorsioni se non necessario,
-        # ma lo gestiremo nel signal.
+    # rimosso
+    # def ricalcola_saldo_netto(self):
+    #     """Metodo helper per aggiornare il netto"""
+    #     self.saldo_finale = self.saldo_dare - self.saldo_avere
+    #     # Nota: Non chiamiamo save() qui per evitare ricorsioni se non necessario,
+    #     # ma lo gestiremo nel signal.
 
 
 class Scrittura(models.Model):

@@ -20,38 +20,48 @@ class EsercizioSerializer(serializers.ModelSerializer):
 
 
 class MastrinoSerializer(serializers.ModelSerializer):
-    dare = serializers.SerializerMethodField()
-    avere = serializers.SerializerMethodField()
-    saldo = serializers.SerializerMethodField()
     label = serializers.ReadOnlyField(source="nome")
+    # usa campi pre-calcolati dall'annotate nel viewset
+    dare = serializers.DecimalField(
+        max_digit=12, decimal_places=2, source="tot_dare", read_only=True, default=0
+    )
+
+    dare = serializers.DecimalField(
+        max_digit=12, decimal_places=2, source="tot_avere", read_only=True, default=0
+    )
+    saldo = serializers.SerializerMethodField()
 
     class Meta:
         model = Mastrino
         fields = ["id", "nome", "codice", "label", "dare", "avere", "saldo"]
 
-    def get_dare(self, obj):
-        # Recuperiamo l'esercizio dai parametri della richiesta (se presente)
-        esercizio_id = self.context.get("request").query_params.get("esercizio")
-        filtrazione = Scrittura.objects.filter(conto_dare=obj)
+    # ------ SPOSTATI IN VIEWSET IN ANNOTATE --------
+    # def get_dare(self, obj):
+    #     # Recuperiamo l'esercizio dai parametri della richiesta (se presente)
+    #     esercizio_id = self.context.get("request").query_params.get("esercizio")
+    #     filtrazione = Scrittura.objects.filter(conto_dare=obj)
 
-        if esercizio_id:
-            filtrazione = filtrazione.filter(esercizio_id=esercizio_id)
+    #     if esercizio_id:
+    #         filtrazione = filtrazione.filter(esercizio_id=esercizio_id)
 
-        res = filtrazione.aggregate(Sum("importo"))
-        return res["importo__sum"] or 0
+    #     res = filtrazione.aggregate(Sum("importo"))
+    #     return res["importo__sum"] or 0
 
-    def get_avere(self, obj):
-        esercizio_id = self.context.get("request").query_params.get("esercizio")
-        filtrazione = Scrittura.objects.filter(conto_avere=obj)
+    # def get_avere(self, obj):
+    #     esercizio_id = self.context.get("request").query_params.get("esercizio")
+    #     filtrazione = Scrittura.objects.filter(conto_avere=obj)
 
-        if esercizio_id:
-            filtrazione = filtrazione.filter(esercizio_id=esercizio_id)
+    #     if esercizio_id:
+    #         filtrazione = filtrazione.filter(esercizio_id=esercizio_id)
 
-        res = filtrazione.aggregate(Sum("importo"))
-        return res["importo__sum"] or 0
+    #     res = filtrazione.aggregate(Sum("importo"))
+    #     return res["importo__sum"] or 0
 
     def get_saldo(self, obj):
-        return self.get_dare(obj) - self.get_avere(obj)
+        dare = getattr(obj, "tot_dare", 0) or 0
+        avere = getattr(obj, "tot_avere", 0) or 0
+
+        return dare - avere
 
 
 class ScritturaSerializer(serializers.ModelSerializer):
