@@ -54,3 +54,15 @@ class CustomTokenSerializer(TokenObtainPairSerializer):
         token = super().get_token(user)
         token["username"] = user.username
         return token
+
+
+class PasswordResetRequestSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+
+class PasswordResetConfirmSerializer(serializers.Serializer):
+    new_password = serializers.CharField(
+        write_only=True, validators=[validate_password]
+    )
+    uid = serializers.CharField(write_only=True)
+    token = serializers.CharField(write_only=True)

@@ -160,3 +160,6 @@ SIMPLE_JWT = {
         days=7
     ),  # refresh token più lungo per poterlo usare
 }
+
+
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
