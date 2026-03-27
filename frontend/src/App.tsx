@@ -2,76 +2,75 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 import ProtectedRoute from "./ProtectedRoute";
 
+// Auth
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
+import ForgotPassword from "./pages/auth/ForgotPassword";
+import ResetPassword from "./pages/auth/ResetPassword";
+
+// Layout e Pagine
 import PrivateLayout from "./components/layout/PrivateLayout";
 import Homepage from "./pages/Hompage";
 
+// Teoria
 import TheoryLayout from "./components/teoria/layout/TheoryLayout";
-import { ThemeProvider } from "./components/teoria/layout/ThemeContext";
 import { theoryRoutes } from "./components/teoria/route/TheoryRoutes";
+
+// Il ThemeProvider viene importato qui per diventare Globale
+import { ThemeProvider } from "./components/teoria/layout/ThemeContext";
 
 import "./App.css";
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <div className="app-root">
-        <Routes>
-          {/* Redirect root */}
-          <Route path="/" element={<Navigate to="/home" replace />} />
+    // 1. Spostiamo il ThemeProvider alla radice.
+    // Ora TUTTA l'app ha accesso al tema e mantiene lo stato durante la navigazione.
+    <ThemeProvider>
+      <BrowserRouter>
+        <div className="app-root">
+          <Routes>
+            {/* Redirect root */}
+            <Route path="/" element={<Navigate to="/home" replace />} />
 
-          {/* Homepage */}
-          <Route
-            path="/home"
-            element={
-              <ThemeProvider>
-                <Homepage />
-              </ThemeProvider>
-            }
-          />
+            {/* Homepage (Rimossa l'istanza singola del ThemeProvider) */}
+            <Route path="/home" element={<Homepage />} />
 
-          {/* Teoria */}
-          <Route
-            path="/teoria/*"
-            element={
-              <ThemeProvider>
-                <TheoryLayout />
-              </ThemeProvider>
-            }
-          >
-            {/* Generazione automatica delle route */}
-            {theoryRoutes.map((route) => (
-              <Route
-                key={route.path}
-                path={route.path}
-                element={<route.component />} // <-- JSX corretto
-              />
-            ))}
+            {/* Teoria (Rimossa l'istanza singola del ThemeProvider) */}
+            <Route path="/teoria/*" element={<TheoryLayout />}>
+              {theoryRoutes.map((route) => (
+                <Route
+                  key={route.path}
+                  path={route.path}
+                  element={<route.component />}
+                />
+              ))}
+              <Route path="*" element={<Navigate to="indice" replace />} />
+            </Route>
 
-            {/* fallback: redirect a indice se non match */}
-            <Route path="*" element={<Navigate to="indice" replace />} />
-          </Route>
+            {/* Auth (Ora ereditano automaticamente il tema) */}
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route
+              path="/reset-password/:uid/:token"
+              element={<ResetPassword />}
+            />
 
-          {/* Auth */}
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-
-          {/* Area privata */}
-          <Route
-            path="/app/*"
-            element={
-              <ProtectedRoute>
-                <PrivateLayout />
-              </ProtectedRoute>
-            }
-          />
-        </Routes>
-      </div>
-    </BrowserRouter>
+            {/* Area privata */}
+            <Route
+              path="/app/*"
+              element={
+                <ProtectedRoute>
+                  <PrivateLayout />
+                </ProtectedRoute>
+              }
+            />
+          </Routes>
+        </div>
+      </BrowserRouter>
+    </ThemeProvider>
   );
 }
-
 // import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 // import ProtectedRoute from "./ProtectedRoute";
@@ -80,19 +79,14 @@ export default function App() {
 // import Register from "./pages/auth/Register";
 // import PrivateLayout from "./components/layout/PrivateLayout";
 // import Homepage from "./pages/Hompage";
+// import ForgotPassword from "./pages/auth/ForgorPassword";
 
 // import TheoryLayout from "./components/teoria/layout/TheoryLayout";
-// import GeneralAccountingTheory from "./components/teoria/pages/Generale";
-// import RateiERisconti from "./components/teoria/pages/RateiRisconti";
-// import LeasingFinanziarioTheory from "./components/teoria/pages/LeasingFinanziario";
-// import ImmobilizzazioniTheory from "./components/teoria/pages/Immobilizzazioni";
-// import Indice from "./components/teoria/pages/Indice";
-// import AumentoCapitaleSocialeTheory from "./components/teoria/pages/AumentoCapitaleSociale";
-// import GuidaCodice from "./components/teoria/pages/GuidaCodice";
-// import GuidaContenuti from "./components/teoria/pages/GuidaContenuti";
 // import { ThemeProvider } from "./components/teoria/layout/ThemeContext";
+// import { theoryRoutes } from "./components/teoria/route/TheoryRoutes";
 
 // import "./App.css";
+// import ResetPassword from "./pages/auth/ResetPassword";
 
 // export default function App() {
 //   return (
@@ -102,7 +96,7 @@ export default function App() {
 //           {/* Redirect root */}
 //           <Route path="/" element={<Navigate to="/home" replace />} />
 
-//           {/* Homepage con ThemeProvider */}
+//           {/* Homepage */}
 //           <Route
 //             path="/home"
 //             element={
@@ -112,37 +106,37 @@ export default function App() {
 //             }
 //           />
 
-//           {/* Teoria e tutte le sue route con ThemeProvider */}
+//           {/* Teoria */}
 //           <Route
-//             path="/teoria"
+//             path="/teoria/*"
 //             element={
 //               <ThemeProvider>
 //                 <TheoryLayout />
 //               </ThemeProvider>
 //             }
 //           >
-//             <Route index element={<Indice />} />
-//             <Route path="indice" element={<Indice />} />
-//             <Route path="guida-ai-contenuti" element={<GuidaContenuti />} />
-//             <Route path="generale" element={<GeneralAccountingTheory />} />
-//             <Route path="ratei-e-risconti" element={<RateiERisconti />} />
-//             <Route path="leasing" element={<LeasingFinanziarioTheory />} />
-//             <Route
-//               path="immobilizzazioni-avanzate"
-//               element={<ImmobilizzazioniTheory />}
-//             />
-//             <Route
-//               path="aumento-capitale-sociale"
-//               element={<AumentoCapitaleSocialeTheory />}
-//             />
-//             <Route path="guida-codice" element={<GuidaCodice />} />
+//             {/* Generazione automatica delle route */}
+//             {theoryRoutes.map((route) => (
+//               <Route
+//                 key={route.path}
+//                 path={route.path}
+//                 element={<route.component />} // <-- JSX corretto
+//               />
+//             ))}
+
+//             {/* fallback: redirect a indice se non match */}
+//             <Route path="*" element={<Navigate to="indice" replace />} />
 //           </Route>
 
-//           {/* Auth senza ThemeProvider */}
+//           {/* Auth */}
 //           <Route path="/login" element={<Login />} />
 //           <Route path="/register" element={<Register />} />
-
-//           {/* Area privata senza ThemeProvider */}
+//           <Route path="/forgot-password" element={<ForgotPassword />} />
+//           <Route
+//             path="/reset-password/:uid/:token"
+//             element={<ResetPassword />}
+//           />
+//           {/* Area privata */}
 //           <Route
 //             path="/app/*"
 //             element={
@@ -156,75 +150,3 @@ export default function App() {
 //     </BrowserRouter>
 //   );
 // }
-
-// // import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-// // import { useState, useEffect } from "react";
-// // import ProtectedRoute from "./ProtectedRoute";
-
-// // import Login from "./pages/auth/Login";
-// // import Register from "./pages/auth/Register";
-// // import PrivateLayout from "./components/layout/PrivateLayout";
-// // import Homepage from "./pages/Hompage";
-
-// // import TheoryLayout from "./components/teoria/layout/TheoryLayout";
-// // import GeneralAccountingTheory from "./components/teoria/pages/Generale";
-// // import RateiERisconti from "./components/teoria/pages/RateiRisconti";
-// // import LeasingFinanziarioTheory from "./components/teoria/pages/LeasingFinanziario";
-// // import ImmobilizzazioniTheory from "./components/teoria/pages/Immobilizzazioni";
-// // import Indice from "./components/teoria/pages/Indice";
-// // import AumentoCapitaleSocialeTheory from "./components/teoria/pages/AumentoCapitaleSociale";
-// // import { ThemeProvider } from "./components/teoria/layout/ThemeContext";
-
-// // import "./App.css";
-
-// // export default function App() {
-// //   const [theme, setTheme] = useState<"light" | "dark">("light");
-
-// //   useEffect(() => {
-// //     document.documentElement.setAttribute("data-theme", theme);
-// //   }, [theme]);
-// //   return (
-// //     <BrowserRouter>
-// //       {/* wrapper globale */}
-// //       <div className="app-root">
-// //         <Routes>
-// //           <Route path="/" element={<Navigate to="/home" replace />} />
-// //           <ThemeProvider>
-// //             <Route path="/home" element={<Homepage />} />
-// //           </ThemeProvider>
-// //           {/* TEORIA */}
-// //           <ThemeProvider>
-// //             <Route path="/teoria" element={<TheoryLayout />}>
-// //               <Route index element={<Indice />} />
-// //               <Route path="indice" element={<Indice />} />
-// //               <Route path="generale" element={<GeneralAccountingTheory />} />
-// //               <Route path="ratei-e-risconti" element={<RateiERisconti />} />
-// //               <Route path="leasing" element={<LeasingFinanziarioTheory />} />
-// //               <Route
-// //                 path="immobilizzazioni-avanzate"
-// //                 element={<ImmobilizzazioniTheory />}
-// //               />
-// //               <Route
-// //                 path="aumento-capitale-sociale"
-// //                 element={<AumentoCapitaleSocialeTheory />}
-// //               />
-// //             </Route>
-// //           </ThemeProvider>
-// //           {/* AUTH */}
-// //           <Route path="/login" element={<Login />} />
-// //           <Route path="/register" element={<Register />} />
-
-// //           {/* AREA PRIVATA */}
-// //           <Route
-// //             path="/app/*"
-// //             element={
-// //               <ProtectedRoute>
-// //                 <PrivateLayout />
-// //               </ProtectedRoute>
-// //             }
-// //           />
-// //         </Routes>
-// //       </div>
-// //     </BrowserRouter>
-// //   );
-// // }

@@ -8,6 +8,7 @@ import ScritturaEditDialog from "../components/scritture/ScritturaEditDialog";
 import ExportScritturePDF from "../components/export/ExportScritturePdf";
 import ExportMastriniPDF from "../components/export/ExportMastriniPdf";
 import GridBackground from "../components/layout/GridBackGround";
+import ThemeToggle from "../components/teoria/layout/ThemeToggle";
 
 export default function Dashboard({ esercizio }: any) {
   const [scritture, setScritture] = useState([]);
@@ -16,8 +17,11 @@ export default function Dashboard({ esercizio }: any) {
   const [editData, setEditData] = useState(null);
 
   const refresh = async () => {
-    const s = await api.get(`/scritture/?esercizio=${esercizio.id}`);
-    const m = await api.get(`/mastrini/?esercizio=${esercizio.id}`);
+    // Esegue le due chiamate API contemporaneamente
+    const [s, m] = await Promise.all([
+      api.get(`/scritture/?esercizio=${esercizio.id}`),
+      api.get(`/mastrini/?esercizio=${esercizio.id}`),
+    ]);
     setScritture(s.data);
     setMastrini(m.data);
   };
@@ -34,67 +38,72 @@ export default function Dashboard({ esercizio }: any) {
     );
 
   return (
-    <Box flex={1} p={3} mt={6}>
-      {/* ==================== HEADER ==================== */}
-      <Box display="flex" flexDirection="column" gap={2}>
-        {/* Titolo */}
-        {/* <Typography variant="h4" textAlign="center">
+    <>
+      <Box sx={{ position: "fixed", top: 10, right: 150, zIndex: 1300 }}>
+        <ThemeToggle />
+      </Box>
+      <Box flex={1} p={3} mt={6}>
+        {/* ==================== HEADER ==================== */}
+        <Box display="flex" flexDirection="column" gap={2}>
+          {/* Titolo */}
+          {/* <Typography variant="h4" textAlign="center">
           {esercizio.nome}
         </Typography> */}
 
-        {/* Toolbar bottoni */}
-        <Stack direction="row" spacing={2} flexWrap="wrap">
-          <Button
-            variant={showBilancio ? "contained" : "outlined"}
-            onClick={() => setShowBilancio((p) => !p)}
-          >
-            {showBilancio ? "Scritture" : "Mastrini"}
-          </Button>
+          {/* Toolbar bottoni */}
+          <Stack direction="row" spacing={2} flexWrap="wrap">
+            <Button
+              variant={showBilancio ? "contained" : "outlined"}
+              onClick={() => setShowBilancio((p) => !p)}
+            >
+              {showBilancio ? "Scritture" : "Mastrini"}
+            </Button>
 
-          {/* Bottoni placeholder */}
-          <ExportScritturePDF scritture={scritture} esercizio={esercizio} />
-          <ExportMastriniPDF mastrini={mastrini} esercizio={esercizio} />
-          <Button variant="outlined">Bottone 4</Button>
-          <Button variant="outlined">Bottone 5</Button>
-        </Stack>
-      </Box>
+            {/* Bottoni placeholder */}
+            <ExportScritturePDF scritture={scritture} esercizio={esercizio} />
+            <ExportMastriniPDF mastrini={mastrini} esercizio={esercizio} />
+            <Button variant="outlined">Bottone 4</Button>
+            <Button variant="outlined">Bottone 5</Button>
+          </Stack>
+        </Box>
 
-      {/* ==================== FORM ==================== */}
-      <Box mt={3}>
-        <ScritturaForm
+        {/* ==================== FORM ==================== */}
+        <Box mt={3}>
+          <ScritturaForm
+            mastrini={mastrini}
+            onSaved={refresh}
+            esercizioId={esercizio.id}
+          />
+        </Box>
+
+        {/* ==================== TABELLE ==================== */}
+        {/* cancellare il box e togliere entrambi gli overflowX per riavere la scrollbar globale*/}
+        <Box mt={3} position="relative">
+          <Fade in={!showBilancio} timeout={250} unmountOnExit>
+            <Box sx={{ width: "100%", overflowX: "auto" }}>
+              <ScrittureTable
+                rows={scritture}
+                onEdit={setEditData}
+                onDeleteComplete={refresh}
+              />
+            </Box>
+          </Fade>
+
+          <Fade in={showBilancio} timeout={250} unmountOnExit>
+            <Box sx={{ width: "100%", overflowX: "auto" }}>
+              <MastriniTable mastrini={mastrini} />
+            </Box>
+          </Fade>
+        </Box>
+
+        {/* ==================== DIALOG EDIT ==================== */}
+        <ScritturaEditDialog
+          data={editData}
+          setData={setEditData}
           mastrini={mastrini}
-          onSaved={refresh}
-          esercizioId={esercizio.id}
+          refresh={refresh}
         />
       </Box>
-
-      {/* ==================== TABELLE ==================== */}
-      {/* cancellare il box e togliere entrambi gli overflowX per riavere la scrollbar globale*/}
-      <Box mt={3} position="relative">
-        <Fade in={!showBilancio} timeout={250} unmountOnExit>
-          <Box sx={{ width: "100%", overflowX: "auto" }}>
-            <ScrittureTable
-              rows={scritture}
-              onEdit={setEditData}
-              onDeleteComplete={refresh}
-            />
-          </Box>
-        </Fade>
-
-        <Fade in={showBilancio} timeout={250} unmountOnExit>
-          <Box sx={{ width: "100%", overflowX: "auto" }}>
-            <MastriniTable mastrini={mastrini} />
-          </Box>
-        </Fade>
-      </Box>
-
-      {/* ==================== DIALOG EDIT ==================== */}
-      <ScritturaEditDialog
-        data={editData}
-        setData={setEditData}
-        mastrini={mastrini}
-        refresh={refresh}
-      />
-    </Box>
+    </>
   );
 }

@@ -16,12 +16,13 @@ import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { register } from "./auth";
 import { useNavigate } from "react-router-dom";
 import GridBackground from "../../components/layout/GridBackGround";
+import ThemeToggle from "../../components/teoria/layout/ThemeToggle";
 
 export default function Register() {
   const [show, setShow] = useState(false);
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState("");
-  const navigate = useNavigate();
+  const nav = useNavigate();
 
   const [form, setForm] = useState({
     username: "",
@@ -85,7 +86,7 @@ export default function Register() {
         confirm_password: form.confirmPassword,
       });
       alert("Registrazione completata!");
-      navigate("/login");
+      nav("/login");
     } catch (e: any) {
       const d = e.response?.data;
       setErr(d?.email || d?.username || d?.password || "Errore sconosciuto");
@@ -127,121 +128,132 @@ export default function Register() {
   /* ---------------- Render ---------------- */
 
   return (
-    <GridBackground>
-      <Card
-        sx={{
-          maxWidth: 400,
-          width: "100%",
-          mx: 2,
-          p: 3,
-          boxShadow: "0 10px 40px rgba(0, 0, 0, 0.55)",
-        }}
-      >
-        <CardContent>
-          <Typography variant="h5" mb={2}>
-            Crea Account
-          </Typography>
+    <>
+      {" "}
+      <Box sx={{ position: "fixed", top: 16, right: 16, zIndex: 1300 }}>
+        <ThemeToggle />
+      </Box>
+      <GridBackground>
+        <Card
+          sx={{
+            maxWidth: 400,
+            width: "100%",
+            mx: 2,
+            p: 3,
+            boxShadow: "0 10px 40px rgba(0, 0, 0, 0.55)",
+          }}
+        >
+          <CardContent>
+            <Typography variant="h5" mb={2}>
+              Crea Account
+            </Typography>
 
-          <form onSubmit={submit}>
-            <TextField
-              fullWidth
-              label="Username"
-              margin="normal"
-              onChange={(e) => setForm({ ...form, username: e.target.value })}
-            />
+            <form onSubmit={submit}>
+              <TextField
+                fullWidth
+                label="Username"
+                margin="normal"
+                onChange={(e) => setForm({ ...form, username: e.target.value })}
+              />
 
-            <TextField
-              fullWidth
-              label="Email"
-              margin="normal"
-              onChange={(e) => setForm({ ...form, email: e.target.value })}
-            />
+              <TextField
+                fullWidth
+                label="Email"
+                margin="normal"
+                onChange={(e) => setForm({ ...form, email: e.target.value })}
+              />
 
-            {/* Password con tooltip */}
-            <Tooltip
-              title={passwordHint}
-              placement="right"
-              arrow
-              open={Boolean(form.password)}
-              componentsProps={{
-                tooltip: {
-                  sx: {
-                    bgcolor: "#f9f9f9",
-                    color: "text.primary",
-                    border: "1px solid #e0e0e0",
-                    boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
-                    fontSize: 13,
+              {/* Password con tooltip */}
+              <Tooltip
+                title={passwordHint}
+                placement="right"
+                arrow
+                open={Boolean(form.password)}
+                componentsProps={{
+                  tooltip: {
+                    sx: {
+                      bgcolor: "#f9f9f9",
+                      color: "text.primary",
+                      border: "1px solid #e0e0e0",
+                      boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
+                      fontSize: 13,
+                    },
                   },
-                },
-                arrow: {
-                  sx: {
-                    color: "#f9f9f9",
+                  arrow: {
+                    sx: {
+                      color: "#f9f9f9",
+                    },
                   },
-                },
-              }}
-            > 
+                }}
+              >
+                <TextField
+                  fullWidth
+                  margin="normal"
+                  label="Password"
+                  type={show ? "text" : "password"}
+                  onChange={(e) =>
+                    setForm({ ...form, password: e.target.value })
+                  }
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton onClick={() => setShow(!show)}>
+                          {show ? <VisibilityOff /> : <Visibility />}
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+              </Tooltip>
+
+              <LinearProgress
+                variant="determinate"
+                value={strength}
+                color={getStrengthColor(strength)}
+                sx={{ my: 1 }}
+              />
+
               <TextField
                 fullWidth
                 margin="normal"
-                label="Password"
+                label="Conferma password"
                 type={show ? "text" : "password"}
-                onChange={(e) => setForm({ ...form, password: e.target.value })}
-                InputProps={{
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <IconButton onClick={() => setShow(!show)}>
-                        {show ? <VisibilityOff /> : <Visibility />}
-                      </IconButton>
-                    </InputAdornment>
-                  ),
-                }}
+                onChange={(e) =>
+                  setForm({ ...form, confirmPassword: e.target.value })
+                }
               />
-            </Tooltip>
 
-            <LinearProgress
-              variant="determinate"
-              value={strength}
-              color={getStrengthColor(strength)}
-              sx={{ my: 1 }}
-            />
-
-            <TextField
-              fullWidth
-              margin="normal"
-              label="Conferma password"
-              type={show ? "text" : "password"}
-              onChange={(e) =>
-                setForm({ ...form, confirmPassword: e.target.value })
-              }
-            />
-
-            {err && (
-              <Typography color="error" mt={1}>
-                {err}
-              </Typography>
-            )}
-
-            <Button
-              type="submit"
-              variant="contained"
-              fullWidth
-              sx={{ mt: 2 }}
-              disabled={loading}
-            >
-              {loading ? (
-                <CircularProgress size={24} color="inherit" />
-              ) : (
-                "Registrati"
+              {err && (
+                <Typography color="error" mt={1}>
+                  {err}
+                </Typography>
               )}
-            </Button>
-          </form>
 
-          <Button fullWidth sx={{ mt: 1 }} onClick={() => navigate("/login")}>
-            Hai già un account? Login
-          </Button>
-        </CardContent>
-      </Card>
-    </GridBackground>
+              <Button
+                type="submit"
+                variant="contained"
+                fullWidth
+                sx={{ mt: 2 }}
+                disabled={loading}
+              >
+                {loading ? (
+                  <CircularProgress size={24} color="inherit" />
+                ) : (
+                  "Registrati"
+                )}
+              </Button>
+            </form>
+
+            <Button fullWidth sx={{ mt: 1 }} onClick={() => nav("/login")}>
+              Hai già un account? Login
+            </Button>
+            <Button fullWidth sx={{ mt: 1 }} onClick={() => nav("/home")}>
+              Torna alla Homepage
+            </Button>
+          </CardContent>
+        </Card>
+      </GridBackground>
+    </>
   );
 }
 
@@ -265,7 +277,7 @@ export default function Register() {
 // export default function Register() {
 //   const [show, setShow] = useState(false);
 //   const [loading, setLoading] = useState(false);
-//   const navigate = useNavigate();
+//   const nav = useNavigate();
 //   const [err, setErr] = useState("");
 //   const [form, setForm] = useState({
 //     username: "",
@@ -311,7 +323,7 @@ export default function Register() {
 //         confirm_password: form.confirmPassword,
 //       });
 //       alert("Registrazione completata!");
-//       navigate("/login");
+//       nav("/login");
 //     } catch (e: any) {
 //       const d = e.response?.data;
 //       setErr(d?.email || d?.username || d?.password || "Errore sconosciuto");
@@ -406,7 +418,7 @@ export default function Register() {
 //             </Button>
 //           </form>
 
-//           <Button fullWidth sx={{ mt: 1 }} onClick={() => navigate("/login")}>
+//           <Button fullWidth sx={{ mt: 1 }} onClick={() => nav("/login")}>
 //             Hai già un account? Login
 //           </Button>
 //           <Button fullWidth sx={{ mt: 1 }} onClick={() => nav("/home")}>

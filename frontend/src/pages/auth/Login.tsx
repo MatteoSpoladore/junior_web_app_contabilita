@@ -1,5 +1,6 @@
 import { useState } from "react";
 import {
+  Box,
   TextField,
   Button,
   Card,
@@ -13,6 +14,7 @@ import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { login } from "./auth";
 import { useNavigate } from "react-router-dom";
 import GridBackground from "../../components/layout/GridBackGround";
+import ThemeToggle from "../../components/teoria/layout/ThemeToggle";
 
 export default function Login() {
   const [show, setShow] = useState(false);
@@ -40,92 +42,104 @@ export default function Login() {
   }
 
   return (
-    <GridBackground>
-      <Card
-        sx={{
-          maxWidth: 350,
-          width: "100%",
-          mx: 2,
-          p: 3,
-          boxShadow: "0 10px 40px rgba(0, 0, 0, 0.55)",
-        }}
-      >
-        <CardContent>
-          <Typography variant="h5" mb={2}>
-            Accedi
-          </Typography>
+    <>
+      <Box sx={{ position: "fixed", top: 16, right: 16, zIndex: 1300 }}>
+        <ThemeToggle />
+      </Box>
+      <GridBackground>
+        <Card
+          sx={{
+            maxWidth: 400,
+            width: "100%",
+            mx: 2,
+            p: 3,
+            boxShadow: "0 10px 40px rgba(0, 0, 0, 0.55)",
+          }}
+        >
+          <CardContent>
+            <Typography variant="h5" mb={2}>
+              Accedi
+            </Typography>
 
-          <form onSubmit={submit} noValidate>
-            <TextField
-              fullWidth
-              label="Username"
-              margin="normal"
-              value={username}
-              onChange={(e) => {
-                setUser(e.target.value);
-                if (err) setErr("");
-              }}
-              required
-              autoComplete="username"
-              error={!!err}
-            />
+            <form onSubmit={submit} noValidate>
+              <TextField
+                fullWidth
+                label="Username"
+                margin="normal"
+                value={username}
+                onChange={(e) => {
+                  setUser(e.target.value);
+                  if (err) setErr("");
+                }}
+                required
+                autoComplete="username"
+                error={!!err}
+              />
 
-            <TextField
-              fullWidth
-              label="Password"
-              margin="normal"
-              type={show ? "text" : "password"}
-              value={password}
-              onChange={(e) => {
-                setPass(e.target.value);
-                if (err) setErr("");
-              }}
-              required
-              autoComplete="current-password"
-              error={!!err}
-              helperText={err}
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton
-                      onClick={() => setShow((prev) => !prev)}
-                      aria-label={
-                        show ? "Nascondi password" : "Mostra password"
-                      }
-                      edge="end"
-                    >
-                      {show ? <VisibilityOff /> : <Visibility />}
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }}
-            />
+              <TextField
+                fullWidth
+                label="Password"
+                margin="normal"
+                type={show ? "text" : "password"}
+                value={password}
+                onChange={(e) => {
+                  setPass(e.target.value);
+                  if (err) setErr("");
+                }}
+                required
+                autoComplete="current-password"
+                error={!!err}
+                helperText={err}
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        onClick={() => setShow((prev) => !prev)}
+                        aria-label={
+                          show ? "Nascondi password" : "Mostra password"
+                        }
+                        edge="end"
+                      >
+                        {show ? <VisibilityOff /> : <Visibility />}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
+              />
+
+              <Button
+                fullWidth
+                variant="contained"
+                sx={{ mt: 2 }}
+                type="submit"
+                disabled={loading}
+              >
+                {loading ? (
+                  <CircularProgress size={24} color="inherit" />
+                ) : (
+                  "Login"
+                )}
+              </Button>
+            </form>
+
+            <Button fullWidth sx={{ mt: 1 }} onClick={() => nav("/register")}>
+              Non hai un account? Registrati
+            </Button>
 
             <Button
               fullWidth
-              variant="contained"
-              sx={{ mt: 2 }}
-              type="submit"
-              disabled={loading}
+              sx={{ mt: 1 }}
+              onClick={() => nav("/forgot-password")}
             >
-              {loading ? (
-                <CircularProgress size={24} color="inherit" />
-              ) : (
-                "Login"
-              )}
+              Password dimenticata?
             </Button>
-          </form>
-
-          <Button fullWidth sx={{ mt: 1 }} onClick={() => nav("/register")}>
-            Non hai un account? Registrati
-          </Button>
-
-          <Button fullWidth sx={{ mt: 1 }} onClick={() => nav("/home")}>
-            Torna alla Homepage
-          </Button>
-        </CardContent>
-      </Card>
-    </GridBackground>
+            <Button fullWidth sx={{ mt: 1 }} onClick={() => nav("/home")}>
+              Torna alla Homepage
+            </Button>
+          </CardContent>
+        </Card>
+      </GridBackground>
+    </>
   );
 }
 
