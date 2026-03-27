@@ -6,6 +6,7 @@ from .views import (
     LogoutView,
     PasswordResetRequestView,
     PasswordResetConfirmView,
+    StudentiAssegnatiView,
 )
 
 urlpatterns = [
@@ -23,4 +24,5 @@ urlpatterns = [
         PasswordResetConfirmView.as_view(),
         name="password_reset_confirm",
     ),
+    path("studenti/", StudentiAssegnatiView.as_view(), name="studenti_assegnati"),
 ]

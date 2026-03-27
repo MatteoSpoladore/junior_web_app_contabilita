@@ -14,7 +14,6 @@ class RegisterSerializer(serializers.ModelSerializer):
             )
         ],
     )
-
     email = serializers.EmailField(
         required=True,
         validators=[
@@ -38,9 +37,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         return data
 
     def create(self, validated_data):
-        # Usare None come secondo argomento evita il KeyError se la chiave manca
         validated_data.pop("confirm_password", None)
-
         return User.objects.create_user(
             username=validated_data["username"],
             email=validated_data["email"],
@@ -48,12 +45,27 @@ class RegisterSerializer(serializers.ModelSerializer):
         )
 
 
+# --- MODIFICA 1: Aggiungiamo il ruolo nel Token ---
 class CustomTokenSerializer(TokenObtainPairSerializer):
     @classmethod
     def get_token(cls, user):
         token = super().get_token(user)
         token["username"] = user.username
+
+        # Controlliamo se ha un profilo e se è un prof, altrimenti False di default
+        is_professore = False
+        if hasattr(user, "profilo"):
+            is_professore = user.profilo.is_professore
+
+        token["is_professore"] = is_professore
         return token
+
+
+# --- NUOVO: Serializer per restituire la lista degli studenti ---
+class StudenteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ("id", "username", "email", "first_name", "last_name")
 
 
 class PasswordResetRequestSerializer(serializers.Serializer):

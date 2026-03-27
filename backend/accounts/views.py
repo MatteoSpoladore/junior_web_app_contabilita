@@ -7,8 +7,8 @@ from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 
 # Django REST Framework
 from rest_framework import status
-from rest_framework.generics import CreateAPIView
-from rest_framework.permissions import AllowAny
+from rest_framework.generics import CreateAPIView, ListAPIView
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -22,6 +22,7 @@ from .serializers import (
     CustomTokenSerializer,
     PasswordResetRequestSerializer,
     PasswordResetConfirmSerializer,
+    StudenteSerializer,
 )
 
 
@@ -129,3 +130,22 @@ class PasswordResetConfirmView(APIView):
                 {"detail": "Il link di reset è invalido o scaduto."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
+
+
+class StudentiAssegnatiView(ListAPIView):
+    """
+    Restituisce la lista degli studenti assegnati all'utente loggato.
+    Se l'utente non è un professore, restituisce una lista vuota.
+    """
+
+    serializer_class = StudenteSerializer
+    permission_classes = [IsAuthenticated]  # Solo gli utenti loggati possono chiamarla
+
+    def get_queryset(self):
+        user = self.request.user
+        # Se l'utente ha un profilo ed è un professore, ritorna i suoi studenti
+        if hasattr(user, "profilo") and user.profilo.is_professore:
+            return user.profilo.studenti.all()
+
+        # Altrimenti, barriera di sicurezza: restituisce un database vuoto
+        return User.objects.none()

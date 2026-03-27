@@ -17,6 +17,8 @@ class Esercizio(models.Model):
                 fields=["user", "nome"], name="unique_esercizio_per_utente"
             )
         ]
+        verbose_name = "Esercizio"
+        verbose_name_plural = "Esercizi"
 
     def __str__(self):
         return self.nome
@@ -36,6 +38,8 @@ class Mastrino(models.Model):
 
     class Meta:
         ordering = ["codice"]
+        verbose_name = "Mastrino"
+        verbose_name_plural = "Mastrini"
 
     def __str__(self):
         return f"{self.codice} - {self.nome}"
@@ -69,6 +73,8 @@ class Scrittura(models.Model):
 
     class Meta:
         ordering = ["-data", "-created_at"]
+        verbose_name = "Scrittura"
+        verbose_name_plural = "Scritture"
 
     def __str__(self):
         return f"{self.data} - {self.descrizione}"
