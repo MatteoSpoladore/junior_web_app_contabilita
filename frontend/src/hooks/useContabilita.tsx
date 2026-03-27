@@ -1,9 +1,11 @@
 import { useState, useEffect, useCallback } from "react";
 import api from "../api";
+import type { Scrittura, Mastrino } from "../types";
 
 export function useContabilita(esercizioId: number | null | undefined) {
-  const [scritture, setScritture] = useState<any[]>([]);
-  const [mastrini, setMastrini] = useState<any[]>([]);
+  // Ora TypeScript sa esattamente cosa c'è dentro questi array
+  const [scritture, setScritture] = useState<Scrittura[]>([]);
+  const [mastrini, setMastrini] = useState<Mastrino[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 

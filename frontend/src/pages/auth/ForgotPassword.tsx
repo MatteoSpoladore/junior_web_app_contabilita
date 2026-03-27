@@ -9,9 +9,9 @@ import {
   Typography,
   CircularProgress,
 } from "@mui/material";
-import api from "../../api";
-import GridBackground from "../../components/layout/GridBackGround";
-import ThemeToggle from "../../components/teoria/layout/ThemeToggle";
+import api from "@/api";
+import GridBackground from "@/components/layout/GridBackGround";
+import ThemeToggle from "@/components/teoria/layout/ThemeToggle";
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");

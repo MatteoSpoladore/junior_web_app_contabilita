@@ -15,8 +15,8 @@ import {
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { register } from "./auth";
 import { useNavigate } from "react-router-dom";
-import GridBackground from "../../components/layout/GridBackGround";
-import ThemeToggle from "../../components/teoria/layout/ThemeToggle";
+import GridBackground from "@/components/layout/GridBackGround";
+import ThemeToggle from "@/components/teoria/layout/ThemeToggle";
 
 export default function Register() {
   const [show, setShow] = useState(false);

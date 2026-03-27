@@ -14,9 +14,9 @@ import {
   Box,
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
-import api from "../../api";
-import GridBackground from "../../components/layout/GridBackGround";
-import ThemeToggle from "../../components/teoria/layout/ThemeToggle";
+import api from "@/api";
+import GridBackground from "@/components/layout/GridBackGround";
+import ThemeToggle from "@/components/teoria/layout/ThemeToggle";
 
 // inglobata anche la logica di difficoltà password di Register
 export default function ResetPassword() {
