@@ -62,13 +62,24 @@ class ScritturaSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
     def validate_esercizio(self, value):
-        """Garantisce che l'esercizio appartenga all'utente loggato"""
+        """Garantisce che l'esercizio appartenga all'utente loggato o a un suo alunno"""
         request = self.context.get("request")
         if request and hasattr(request, "user"):
-            if value.user != request.user:
-                raise serializers.ValidationError(
-                    "Non sei autorizzato a registrare scritture in questo esercizio."
-                )
+            user = request.user
+
+            # 1. Accesso garantito se sei il proprietario dell'esercizio
+            if value.user == user:
+                return value
+
+            # 2. Accesso garantito se sei un prof e il proprietario è tuo alunno
+            if hasattr(user, "profilo") and user.profilo.is_professore:
+                if user.profilo.studenti.filter(id=value.user.id).exists():
+                    return value
+
+            # 3. Blocco di sicurezza in tutti gli altri casi
+            raise serializers.ValidationError(
+                "Non sei autorizzato a registrare o modificare scritture in questo esercizio."
+            )
         return value
 
     def validate(self, data):

@@ -1,14 +1,9 @@
-import { useState, useEffect } from "react";
-import { Box, CssBaseline, Fade, Button } from "@mui/material";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import { jwtDecode } from "jwt-decode";
+import { useState } from "react";
+import { Box, CssBaseline, Fade } from "@mui/material";
+import { Outlet, useLocation } from "react-router-dom"; // <-- IMPORTANTE: Outlet
 
 import Header from "./Header";
 import Sidebar from "./Sidebar";
-import Dashboard from "@/pages/Dashboard";
-import TeacherDashboard from "@/pages/TeacherDashboard";
-import StudentDetail from "@/pages/StudentDetail";
-import api from "@/api";
 
 import {
   DRAWER_WIDTH,
@@ -17,68 +12,20 @@ import {
 } from "./layout.constants";
 
 export default function PrivateLayout() {
-  const [esercizi, setEsercizi] = useState([]);
-  const [esercizioSelezionato, setEsercizioSelezionato] = useState<any>(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [loading, setLoading] = useState(true);
-  const [isProfessore, setIsProfessore] = useState(false);
-  const [studenteSelezionato, setStudenteSelezionato] = useState<any>(null);
-
-  // Fetch esercizi - la gestione token è in api.ts
-  const fetchEsercizi = async () => {
-    setLoading(true);
-    try {
-      const res = await api.get("/esercizi/");
-      setEsercizi(res.data);
-    } catch (err: any) {
-      console.error("Errore fetching esercizi:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    // Controllo del ruolo prima di caricare il resto
-    const token = localStorage.getItem("access");
-    if (token) {
-      try {
-        const decodedToken: any = jwtDecode(token);
-        if (decodedToken.is_professore) {
-          setIsProfessore(true);
-        }
-      } catch (error) {
-        console.error("Errore nella decodifica del token", error);
-      }
-    }
-
-    fetchEsercizi();
-  }, []);
-
-  // Effetto magico: Se clicchi un esercizio dalla sidebar mentre guardi un alunno, chiudi la visualizzazione alunno
-  useEffect(() => {
-    if (esercizioSelezionato && studenteSelezionato) {
-      setStudenteSelezionato(null);
-    }
-  }, [esercizioSelezionato]);
-
-  if (loading) {
-    return <Box p={3}>Caricamento...</Box>;
-  }
+  const location = useLocation(); // Ci serve per animare dolcemente i cambi pagina
 
   return (
     <Box sx={{ minHeight: "100vh" }}>
       <CssBaseline />
+
+      {/* 1. LA CORNICE SUPERIORE */}
       <Header toggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
 
-      {/* La sidebar mostra gli esercizi di proprietà dell'utente loggato (Prof o Studente) */}
-      <Sidebar
-        open={sidebarOpen}
-        esercizi={esercizi}
-        setEsercizioSelezionato={setEsercizioSelezionato}
-        esercizioSelezionato={esercizioSelezionato}
-        refreshEsercizi={fetchEsercizi}
-      />
+      {/* 2. LA CORNICE LATERALE (Ora è indipendente e si scarica i dati da sola!) */}
+      <Sidebar open={sidebarOpen} />
 
+      {/* 3. IL CONTENUTO CENTRALE */}
       <Box
         component="main"
         sx={{
@@ -89,48 +36,11 @@ export default function PrivateLayout() {
           pt: 2,
         }}
       >
-        <Fade
-          key={
-            esercizioSelezionato?.id ||
-            studenteSelezionato?.id ||
-            (isProfessore ? "prof" : "home")
-          }
-          in
-          timeout={300}
-        >
+        {/* L'animazione scatta ogni volta che l'URL cambia */}
+        <Fade key={location.pathname} in timeout={300}>
           <Box>
-            {/* LOGICA DI NAVIGAZIONE INTELLIGENTE */}
-
-            {esercizioSelezionato ? (
-              // 1. STATO: Guardiamo un esercizio (nostro o di un alunno)
-              <Box p={3} pt={8}>
-                {isProfessore && (
-                  <Button
-                    startIcon={<ArrowBackIcon />}
-                    onClick={() => {
-                      setEsercizioSelezionato(null);
-                    }}
-                    sx={{ mb: 2 }}
-                  >
-                    Chiudi Esercizio
-                  </Button>
-                )}
-                <Dashboard esercizio={esercizioSelezionato} />
-              </Box>
-            ) : studenteSelezionato ? (
-              // 2. STATO: Guardiamo il dettaglio di un alunno (solo Prof)
-              <StudentDetail
-                studente={studenteSelezionato}
-                onBack={() => setStudenteSelezionato(null)}
-                onSelectEsercizio={setEsercizioSelezionato}
-              />
-            ) : isProfessore ? (
-              // 3. STATO: Home del Professore (Lista alunni)
-              <TeacherDashboard onSelectStudent={setStudenteSelezionato} />
-            ) : (
-              // 4. STATO: Home dello Studente (Schermata vuota / "Seleziona esercizio")
-              <Dashboard esercizio={null} />
-            )}
+            {/* IL BUCO MAGICO: Qui React Router incolla Dashboard, TeacherDashboard o StudentDetail! */}
+            <Outlet />
           </Box>
         </Fade>
       </Box>

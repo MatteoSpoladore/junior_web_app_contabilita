@@ -5,74 +5,79 @@ import {
   DialogActions,
   TextField,
   Button,
+  CircularProgress,
 } from "@mui/material";
 import { useEffect, useState } from "react";
+import api from "@/api"; // Importiamo l'API direttamente qui!
 
 interface Props {
   open: boolean;
   esercizio: any | null;
-  eserciziUtente: { nome: string; id: number }[]; // lista degli esercizi dell'utente
+  eserciziUtente: { nome: string; id: number }[];
   onClose: () => void;
-  onSave: (nome: string) => void;
+  onSuccess: () => void; // Cambiato da onSave a onSuccess
 }
 
-export default function EditEsercizioDialog({
+export default function EditDialogEsercizio({
   open,
   esercizio,
   eserciziUtente,
   onClose,
-  onSave,
+  onSuccess,
 }: Props) {
   const [nome, setNome] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false); // Stato per il bottoncino
 
   useEffect(() => {
-    if (esercizio) {
+    if (esercizio && open) {
       setNome(esercizio.nome);
       setError("");
     }
-  }, [esercizio]);
+  }, [esercizio, open]);
 
-  const handleSave = () => {
+  const handleSave = async () => {
     const trimmedNome = nome.trim();
     if (!trimmedNome) return;
 
-    // Se il nome non è cambiato, chiudi semplicemente il dialog
     if (trimmedNome === esercizio?.nome) {
-      onSave(trimmedNome); // aggiorna stato locale
-      onClose(); // chiudi dialog
+      onClose();
       return;
     }
 
-    // Controllo duplicati solo se il nome è cambiato
     const nomeEsistente = eserciziUtente.some(
       (e) =>
         e.nome.toLowerCase() === trimmedNome.toLowerCase() &&
-        e.id !== esercizio?.id
+        e.id !== esercizio?.id,
     );
 
     if (nomeEsistente) {
-      setError("Esiste già un esercizio con questo nome. Cambialo.");
+      setError("Esiste già un esercizio con questo nome.");
       return;
     }
 
-    onSave(trimmedNome); // qui il backend verrà chiamato dal genitore
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      handleSave();
-    } else if (e.key === "Escape") {
-      e.preventDefault();
-      onClose();
+    // --- CHIAMATA API SPOSTATA QUI DENTRO ---
+    setLoading(true);
+    try {
+      await api.put(`/esercizi/${esercizio.id}/`, { nome: trimmedNome });
+      onSuccess(); // Avvisa la sidebar di ricaricare la lista
+      onClose(); // Chiudi la finestra
+    } catch (err) {
+      setError("Errore durante il salvataggio.");
+      console.error(err);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
+    <Dialog
+      open={open}
+      onClose={!loading ? onClose : undefined}
+      fullWidth
+      maxWidth="sm"
+    >
       <DialogTitle>Modifica esercizio</DialogTitle>
-
       <DialogContent>
         <TextField
           autoFocus
@@ -81,18 +86,20 @@ export default function EditEsercizioDialog({
           fullWidth
           value={nome}
           onChange={(e) => setNome(e.target.value)}
-          onKeyDown={handleKeyDown}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !loading) handleSave();
+          }}
           error={!!error}
           helperText={error}
+          disabled={loading} // Blocca l'input mentre carica
         />
       </DialogContent>
-
       <DialogActions>
-        <Button onClick={onClose} color="inherit">
+        <Button onClick={onClose} color="inherit" disabled={loading}>
           Annulla
         </Button>
-        <Button onClick={handleSave} variant="contained">
-          Salva
+        <Button onClick={handleSave} variant="contained" disabled={loading}>
+          {loading ? <CircularProgress size={24} color="inherit" /> : "Salva"}
         </Button>
       </DialogActions>
     </Dialog>

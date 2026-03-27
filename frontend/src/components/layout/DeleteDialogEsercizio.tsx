@@ -5,35 +5,45 @@ import {
   DialogActions,
   Button,
   Typography,
+  CircularProgress,
 } from "@mui/material";
+import { useState } from "react";
+import api from "@/api"; // Importiamo l'API
 
 interface Props {
   open: boolean;
   esercizio: any | null;
   onClose: () => void;
-  onConfirm: () => void;
+  onSuccess: () => void; // Rinomato per coerenza
 }
 
-export default function DeleteEsercizioDialog({
+export default function DeleteDialogEsercizio({
   open,
   esercizio,
   onClose,
-  onConfirm,
+  onSuccess,
 }: Props) {
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      onConfirm();
-    } else if (e.key === "Escape") {
-      e.preventDefault();
+  const [loading, setLoading] = useState(false);
+
+  const handleConfirm = async () => {
+    if (!esercizio) return;
+
+    // --- CHIAMATA API SPOSTATA QUI DENTRO ---
+    setLoading(true);
+    try {
+      await api.delete(`/esercizi/${esercizio.id}/`);
+      onSuccess();
       onClose();
+    } catch (error) {
+      console.error("Errore durante l'eliminazione:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <Dialog open={open} onClose={onClose} onKeyDown={handleKeyDown}>
+    <Dialog open={open} onClose={!loading ? onClose : undefined}>
       <DialogTitle color="error">Elimina esercizio</DialogTitle>
-
       <DialogContent>
         <Typography>
           Sei sicuro di voler eliminare <strong>{esercizio?.nome}</strong>?
@@ -42,13 +52,17 @@ export default function DeleteEsercizioDialog({
           Questa azione non può essere annullata.
         </Typography>
       </DialogContent>
-
       <DialogActions>
-        <Button onClick={onClose} color="inherit">
+        <Button onClick={onClose} color="inherit" disabled={loading}>
           Annulla
         </Button>
-        <Button onClick={onConfirm} color="error" variant="contained">
-          Elimina
+        <Button
+          onClick={handleConfirm}
+          color="error"
+          variant="contained"
+          disabled={loading}
+        >
+          {loading ? <CircularProgress size={24} color="inherit" /> : "Elimina"}
         </Button>
       </DialogActions>
     </Dialog>

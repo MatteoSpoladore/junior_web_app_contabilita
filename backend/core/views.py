@@ -12,20 +12,25 @@ class EsercizioViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         user = self.request.user
 
-        # 1. Base: L'utente vede sempre i propri esercizi
-        queryset = Esercizio.objects.filter(user=user)
+        # 1. Se stiamo chiedendo la lista completa (es. per la Sidebar o per la pagina Alunno)
+        if self.action == "list":
+            alunno_id = self.request.query_params.get("alunno_id")
+            if alunno_id:
+                if hasattr(user, "profilo") and user.profilo.is_professore:
+                    if user.profilo.studenti.filter(id=alunno_id).exists():
+                        return Esercizio.objects.filter(user_id=alunno_id)
+                return Esercizio.objects.none()
+            # Sidebar di default: mostra solo i miei
+            return Esercizio.objects.filter(user=user)
 
-        # 2. Pass Speciale: Se è prof, può vedere anche gli esercizi dei suoi alunni
+        # 2. Se stiamo accedendo a un esercizio specifico (Retrieve, Update, Delete)
+        # Il prof ha il "Pass Partout" per accedere anche a quelli degli alunni
+        queryset = Esercizio.objects.filter(user=user)
         if hasattr(user, "profilo") and user.profilo.is_professore:
             studenti_ids = user.profilo.studenti.values_list("id", flat=True)
             queryset = Esercizio.objects.filter(
                 Q(user=user) | Q(user_id__in=studenti_ids)
             )
-
-        # 3. Filtro richiesto dal frontend per vedere un singolo alunno
-        alunno_id = self.request.query_params.get("alunno_id")
-        if alunno_id:
-            queryset = queryset.filter(user_id=alunno_id)
 
         return queryset
 

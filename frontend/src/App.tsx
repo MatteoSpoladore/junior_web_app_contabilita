@@ -1,4 +1,11 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  Navigate,
+  useNavigate,
+} from "react-router-dom";
+import { jwtDecode } from "jwt-decode";
 
 import ProtectedRoute from "./ProtectedRoute";
 
@@ -11,20 +18,49 @@ import ResetPassword from "./pages/auth/ResetPassword";
 // Layout e Pagine
 import PrivateLayout from "./components/layout/PrivateLayout";
 import Homepage from "./pages/Hompage";
+import Dashboard from "./pages/Dashboard";
+import TeacherDashboard from "./pages/TeacherDashboard";
+import StudentDetail from "./pages/StudentDetail";
 
 // Teoria
 import TheoryLayout from "./components/teoria/layout/TheoryLayout";
 import { theoryRoutes } from "./components/teoria/route/TheoryRoutes";
 
-// Il ThemeProvider viene importato qui per diventare Globale
+// Theme
 import { ThemeProvider } from "./components/teoria/layout/ThemeContext";
 
 import "./App.css";
 
+// --- IL DEVIATORE INTELLIGENTE ---
+// Sceglie cosa mostrare in base al ruolo dell'utente quando visita "/app"
+function HomeRouter() {
+  const navigate = useNavigate();
+  const token = localStorage.getItem("access"); // Assicurati che sia la chiave giusta
+  let isProf = false;
+
+  if (token) {
+    try {
+      isProf = (jwtDecode(token) as any).is_professore;
+    } catch (e) {
+      console.error("Token non valido", e);
+    }
+  }
+
+  if (isProf) {
+    // Se è prof, gli passiamo una funzione che CAMBIA L'URL invece di usare gli state!
+    return (
+      <TeacherDashboard
+        onSelectStudent={(studente) => navigate(`/app/alunno/${studente.id}`)}
+      />
+    );
+  } else {
+    // Se è studente, vede la pagina vuota
+    return <Dashboard esercizio={null} />;
+  }
+}
+
 export default function App() {
   return (
-    // 1. Spostiamo il ThemeProvider alla radice.
-    // Ora TUTTA l'app ha accesso al tema e mantiene lo stato durante la navigazione.
     <ThemeProvider>
       <BrowserRouter>
         <div className="app-root">
@@ -32,10 +68,10 @@ export default function App() {
             {/* Redirect root */}
             <Route path="/" element={<Navigate to="/home" replace />} />
 
-            {/* Homepage (Rimossa l'istanza singola del ThemeProvider) */}
+            {/* Homepage */}
             <Route path="/home" element={<Homepage />} />
 
-            {/* Teoria (Rimossa l'istanza singola del ThemeProvider) */}
+            {/* Teoria */}
             <Route path="/teoria/*" element={<TheoryLayout />}>
               {theoryRoutes.map((route) => (
                 <Route
@@ -47,7 +83,7 @@ export default function App() {
               <Route path="*" element={<Navigate to="indice" replace />} />
             </Route>
 
-            {/* Auth (Ora ereditano automaticamente il tema) */}
+            {/* Auth */}
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
@@ -56,97 +92,26 @@ export default function App() {
               element={<ResetPassword />}
             />
 
-            {/* Area privata */}
+            {/* --- AREA PRIVATA (REACT ROUTER) --- */}
             <Route
-              path="/app/*"
+              path="/app"
               element={
                 <ProtectedRoute>
                   <PrivateLayout />
                 </ProtectedRoute>
               }
-            />
+            >
+              {/* Le rotte figlie verranno iniettate dentro <Outlet /> nel PrivateLayout */}
+              <Route index element={<HomeRouter />} />
+              <Route path="alunno/:id" element={<StudentDetail />} />
+              <Route
+                path="esercizio/:id"
+                element={<Dashboard esercizio={null} />}
+              />
+            </Route>
           </Routes>
         </div>
       </BrowserRouter>
     </ThemeProvider>
   );
 }
-// import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-
-// import ProtectedRoute from "./ProtectedRoute";
-
-// import Login from "./pages/auth/Login";
-// import Register from "./pages/auth/Register";
-// import PrivateLayout from "./components/layout/PrivateLayout";
-// import Homepage from "./pages/Hompage";
-// import ForgotPassword from "./pages/auth/ForgorPassword";
-
-// import TheoryLayout from "./components/teoria/layout/TheoryLayout";
-// import { ThemeProvider } from "./components/teoria/layout/ThemeContext";
-// import { theoryRoutes } from "./components/teoria/route/TheoryRoutes";
-
-// import "./App.css";
-// import ResetPassword from "./pages/auth/ResetPassword";
-
-// export default function App() {
-//   return (
-//     <BrowserRouter>
-//       <div className="app-root">
-//         <Routes>
-//           {/* Redirect root */}
-//           <Route path="/" element={<Navigate to="/home" replace />} />
-
-//           {/* Homepage */}
-//           <Route
-//             path="/home"
-//             element={
-//               <ThemeProvider>
-//                 <Homepage />
-//               </ThemeProvider>
-//             }
-//           />
-
-//           {/* Teoria */}
-//           <Route
-//             path="/teoria/*"
-//             element={
-//               <ThemeProvider>
-//                 <TheoryLayout />
-//               </ThemeProvider>
-//             }
-//           >
-//             {/* Generazione automatica delle route */}
-//             {theoryRoutes.map((route) => (
-//               <Route
-//                 key={route.path}
-//                 path={route.path}
-//                 element={<route.component />} // <-- JSX corretto
-//               />
-//             ))}
-
-//             {/* fallback: redirect a indice se non match */}
-//             <Route path="*" element={<Navigate to="indice" replace />} />
-//           </Route>
-
-//           {/* Auth */}
-//           <Route path="/login" element={<Login />} />
-//           <Route path="/register" element={<Register />} />
-//           <Route path="/forgot-password" element={<ForgotPassword />} />
-//           <Route
-//             path="/reset-password/:uid/:token"
-//             element={<ResetPassword />}
-//           />
-//           {/* Area privata */}
-//           <Route
-//             path="/app/*"
-//             element={
-//               <ProtectedRoute>
-//                 <PrivateLayout />
-//               </ProtectedRoute>
-//             }
-//           />
-//         </Routes>
-//       </div>
-//     </BrowserRouter>
-//   );
-// }
