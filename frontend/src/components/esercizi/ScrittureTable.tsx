@@ -20,25 +20,25 @@ export default function ScrittureTable({
     {
       field: "descrizione",
       headerName: "Descrizione",
-      width: 250,
+      width: 500,
       sortable: false,
     },
     {
       field: "conto_dare_nome",
       headerName: "Conto Dare",
-      width: 250,
+      width: 300,
       sortable: false,
     },
     {
       field: "conto_avere_nome",
       headerName: "Conto Avere",
-      width: 250,
+      width: 300,
       sortable: false,
     },
     {
       field: "importo",
       headerName: "Importo",
-      width: 140,
+      width: 150,
       align: "right",
       headerAlign: "right",
       sortable: false,
@@ -47,8 +47,9 @@ export default function ScrittureTable({
     {
       field: "actions",
       headerName: "Azioni",
-      width: 100,
+      width: 150,
       sortable: false,
+      headerAlign: "center",
       renderCell: (p: any) => (
         <Box display="flex" justifyContent="center" width="100%">
           <Stack direction="row" spacing={1}>

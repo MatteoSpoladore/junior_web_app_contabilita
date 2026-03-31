@@ -180,7 +180,7 @@ export default function Sidebar({ open }: { open: boolean }) {
                         noWrap: true,
                       }}
                       sx={{
-                        maxWidth: open ? "130px" : "100%",
+                        maxWidth: open ? "90px" : "100%",
                         overflow: "hidden",
                       }}
                     />
