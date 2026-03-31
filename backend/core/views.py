@@ -1,6 +1,11 @@
 from rest_framework import viewsets
-from .models import Esercizio, Mastrino, Scrittura
-from .serializers import EsercizioSerializer, MastrinoSerializer, ScritturaSerializer
+from .models import Esercizio, Mastrino, Operazione, RigaOperazione
+from .serializers import (
+    EsercizioSerializer,
+    MastrinoSerializer,
+    OperazioneSerializer,
+    RigaOperazioneSerializer,
+)
 from rest_framework.permissions import IsAuthenticated
 from django.db.models import Sum, Q
 
@@ -77,25 +82,51 @@ class MastrinoViewSet(viewsets.ReadOnlyModelViewSet):
         return queryset
 
 
-class ScritturaViewSet(viewsets.ModelViewSet):
-    serializer_class = ScritturaSerializer
+# class ScritturaViewSet(viewsets.ModelViewSet):
+#     serializer_class = ScritturaSerializer
+#     permission_classes = [IsAuthenticated]
+
+#     def get_queryset(self):
+#         user = self.request.user
+
+#         # Stessa logica: unisce le scritture proprie con quelle degli alunni (se prof)
+#         if hasattr(user, "profilo") and user.profilo.is_professore:
+#             studenti_ids = user.profilo.studenti.values_list("id", flat=True)
+#             queryset = Scrittura.objects.select_related(
+#                 "esercizio", "conto_dare", "conto_avere"
+#             ).filter(Q(esercizio__user=user) | Q(esercizio__user_id__in=studenti_ids))
+#         else:
+#             queryset = Scrittura.objects.select_related(
+#                 "esercizio", "conto_dare", "conto_avere"
+#             ).filter(esercizio__user=user)
+
+#         esercizio_id = self.request.query_params.get("esercizio")
+#         if esercizio_id:
+#             queryset = queryset.filter(esercizio_id=esercizio_id)
+#         return queryset
+
+
+class OperazioneViewSet(viewsets.ModelViewSet):
+    serializer_class = OperazioneSerializer
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         user = self.request.user
 
-        # Stessa logica: unisce le scritture proprie con quelle degli alunni (se prof)
+        queryset = Operazione.objects.prefetch_related("righe__conto").select_related(
+            "esercizio"
+        )
+
         if hasattr(user, "profilo") and user.profilo.is_professore:
             studenti_ids = user.profilo.studenti.values_list("id", flat=True)
-            queryset = Scrittura.objects.select_related(
-                "esercizio", "conto_dare", "conto_avere"
-            ).filter(Q(esercizio__user=user) | Q(esercizio__user_id__in=studenti_ids))
+            queryset = queryset.filter(
+                Q(esercizio__user=user) | Q(esercizio__user_id__in=studenti_ids)
+            )
         else:
-            queryset = Scrittura.objects.select_related(
-                "esercizio", "conto_dare", "conto_avere"
-            ).filter(esercizio__user=user)
+            queryset = queryset.filter(esercizio__user=user)
 
         esercizio_id = self.request.query_params.get("esercizio")
         if esercizio_id:
             queryset = queryset.filter(esercizio_id=esercizio_id)
+
         return queryset

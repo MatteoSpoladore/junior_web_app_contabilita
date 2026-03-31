@@ -52,29 +52,71 @@ class Mastrino(models.Model):
     #     # ma lo gestiremo nel signal.
 
 
-class Scrittura(models.Model):
+# class Scrittura(models.Model):
+#     esercizio = models.ForeignKey(
+#         Esercizio, on_delete=models.CASCADE, related_name="scritture"
+#     )
+#     data = models.DateField()
+#     descrizione = models.CharField(max_length=255)
+
+#     # Relazioni con i Mastrini
+#     conto_dare = models.ForeignKey(
+#         Mastrino, on_delete=models.PROTECT, related_name="movimenti_dare"
+#     )
+#     conto_avere = models.ForeignKey(
+#         Mastrino, on_delete=models.PROTECT, related_name="movimenti_avere"
+#     )
+
+#     importo = models.DecimalField(max_digits=12, decimal_places=2)
+
+#     created_at = models.DateTimeField(auto_now_add=True)
+
+#     class Meta:
+#         ordering = ["-data", "-created_at"]
+#         verbose_name = "Scrittura"
+#         verbose_name_plural = "Scritture"
+
+#     def __str__(self):
+#         return f"{self.data} - {self.descrizione}"
+# backend/core/models.py
+# (Mantieni Esercizio e Mastrino così come sono)
+
+
+class Operazione(models.Model):
     esercizio = models.ForeignKey(
-        Esercizio, on_delete=models.CASCADE, related_name="scritture"
+        Esercizio, on_delete=models.CASCADE, related_name="operazioni"
     )
     data = models.DateField()
     descrizione = models.CharField(max_length=255)
-
-    # Relazioni con i Mastrini
-    conto_dare = models.ForeignKey(
-        Mastrino, on_delete=models.PROTECT, related_name="movimenti_dare"
-    )
-    conto_avere = models.ForeignKey(
-        Mastrino, on_delete=models.PROTECT, related_name="movimenti_avere"
-    )
-
-    importo = models.DecimalField(max_digits=12, decimal_places=2)
-
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         ordering = ["-data", "-created_at"]
-        verbose_name = "Scrittura"
-        verbose_name_plural = "Scritture"
+        verbose_name = "Operazione"
+        verbose_name_plural = "Operazioni"
 
     def __str__(self):
         return f"{self.data} - {self.descrizione}"
+
+
+class RigaOperazione(models.Model):
+    TIPO_MOVIMENTO = [
+        ("D", "Dare"),
+        ("A", "Avere"),
+    ]
+
+    operazione = models.ForeignKey(
+        Operazione, on_delete=models.CASCADE, related_name="righe"
+    )
+    conto = models.ForeignKey(
+        Mastrino, on_delete=models.PROTECT, related_name="movimenti"
+    )
+    sezione = models.CharField(max_length=1, choices=TIPO_MOVIMENTO)
+    importo = models.DecimalField(max_digits=12, decimal_places=2)
+
+    class Meta:
+        verbose_name = "Riga Operazione"
+        verbose_name_plural = "Righe Operazioni"
+
+    def __str__(self):
+        return f"{self.conto.nome} ({self.sezione}): {self.importo}"
