@@ -69,14 +69,22 @@ class MastrinoViewSet(viewsets.ReadOnlyModelViewSet):
             if not (is_owner or is_prof_of_owner):
                 return Mastrino.objects.none()
 
+            # --- LA MODIFICA È QUI ---
+            # Ora calcoliamo i totali passando attraverso "RigaOperazione" -> "Operazione"
             queryset = queryset.annotate(
                 tot_dare=Sum(
-                    "movimenti_dare__importo",
-                    filter=Q(movimenti_dare__esercizio_id=esercizio_id),
+                    "movimenti__importo",
+                    filter=Q(
+                        movimenti__operazione__esercizio_id=esercizio_id,
+                        movimenti__sezione="D",
+                    ),
                 ),
                 tot_avere=Sum(
-                    "movimenti_avere__importo",
-                    filter=Q(movimenti_avere__esercizio_id=esercizio_id),
+                    "movimenti__importo",
+                    filter=Q(
+                        movimenti__operazione__esercizio_id=esercizio_id,
+                        movimenti__sezione="A",
+                    ),
                 ),
             )
         return queryset

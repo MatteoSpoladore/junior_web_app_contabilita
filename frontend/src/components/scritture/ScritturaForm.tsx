@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useState, useMemo } from "react";
 import {
   Card,
   CardContent,
@@ -6,417 +6,258 @@ import {
   TextField,
   Button,
   Autocomplete,
-  Checkbox,
-  FormControlLabel,
-  Collapse,
+  IconButton,
+  Typography,
+  Box,
+  Divider,
 } from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
+import DeleteIcon from "@mui/icons-material/Delete";
 import api from "../../api";
 
-const ROWS_COUNT = 6;
-
-type Row = {
-  data: string;
-  descrizione: string;
-  conto_dare: any | null;
-  conto_avere: any | null;
-  importo: string;
+// Nuovo tipo di stato: via la "sezione", dentro "dare" e "avere" separati
+type RigaForm = {
+  conto: any | null;
+  dare: string;
+  avere: string;
 };
 
-const emptyRow = (): Row => ({
-  data: new Date().toISOString().split("T")[0],
-  descrizione: "",
-  conto_dare: null,
-  conto_avere: null,
-  importo: "",
+const rigaVuota = (): RigaForm => ({
+  conto: null,
+  dare: "",
+  avere: "",
 });
 
 export default function ScritturaForm({ mastrini, esercizioId, onSaved }: any) {
-  const [multi, setMulti] = useState(false);
+  const [data, setData] = useState(new Date().toISOString().split("T")[0]);
+  const [descrizione, setDescrizione] = useState("");
 
-  const [rows, setRows] = useState<Row[]>(
-    Array.from({ length: ROWS_COUNT }, emptyRow),
+  // Inizializziamo con due righe vuote
+  const [righe, setRighe] = useState<RigaForm[]>([rigaVuota(), rigaVuota()]);
+
+  // Calcolo dei totali in tempo reale
+  const totDare = useMemo(
+    () => righe.reduce((acc, r) => acc + Number(r.dare || 0), 0),
+    [righe],
   );
 
-  const [rowErrors, setRowErrors] = useState<boolean[]>(
-    Array.from({ length: ROWS_COUNT }, () => false),
+  const totAvere = useMemo(
+    () => righe.reduce((acc, r) => acc + Number(r.avere || 0), 0),
+    [righe],
   );
 
-  const descrizioneRef = useRef<HTMLInputElement>(null);
+  const isQuadraturaOk = totDare === totAvere && totDare > 0;
 
-  const isRowEmpty = (r: Row) => !r.conto_dare && !r.conto_avere && !r.importo;
+  // Il form è completo se la descrizione c'è e ogni riga ha un conto e ALMENO un importo (Dare o Avere)
+  const isFormCompleto =
+    descrizione.trim() !== "" &&
+    righe.every((r) => r.conto !== null && (r.dare !== "" || r.avere !== ""));
 
-  const isRowComplete = (r: Row) => r.conto_dare && r.conto_avere && r.importo;
-
-  const sameAccount = (r: Row) =>
-    r.conto_dare && r.conto_avere && r.conto_dare.id === r.conto_avere.id;
-
-  const updateRow = (i: number, updater: (r: Row) => Row) => {
-    setRows((prev) => {
+  const updateRiga = (index: number, campo: keyof RigaForm, valore: any) => {
+    setRighe((prev) => {
       const copy = [...prev];
-      copy[i] = updater(copy[i]);
 
-      const nowValid =
-        isRowEmpty(copy[i]) ||
-        (isRowComplete(copy[i]) && !sameAccount(copy[i]));
-
-      if (nowValid && rowErrors[i]) {
-        setRowErrors((errs) => {
-          const e = [...errs];
-          e[i] = false;
-          return e;
-        });
+      if (campo === "dare") {
+        // Se scrivo in Dare, svuoto l'Avere
+        copy[index] = {
+          ...copy[index],
+          dare: valore,
+          avere: valore !== "" ? "" : copy[index].avere,
+        };
+      } else if (campo === "avere") {
+        // Se scrivo in Avere, svuoto il Dare
+        copy[index] = {
+          ...copy[index],
+          avere: valore,
+          dare: valore !== "" ? "" : copy[index].dare,
+        };
+      } else {
+        copy[index] = { ...copy[index], [campo]: valore };
       }
 
       return copy;
     });
   };
 
-  const save = async (e?: any) => {
-    e?.preventDefault();
-
-    const visibleRows = rows.map((r, i) => (i === 0 || multi ? r : null));
-
-    const errors = visibleRows.map((r) => {
-      if (!r) return false;
-      const incomplete = !isRowEmpty(r) && !isRowComplete(r);
-      return incomplete || sameAccount(r);
-    });
-
-    setRowErrors(errors);
-
-    if (errors.some(Boolean)) return;
-
-    for (const r of visibleRows.filter(
-      (r): r is Row => !!r && isRowComplete(r),
-    )) {
-      await api.post("/scritture/", {
-        esercizio: esercizioId,
-        data: r.data,
-        descrizione: r.descrizione,
-        conto_dare: r.conto_dare.id,
-        conto_avere: r.conto_avere.id,
-        importo: r.importo,
-      });
-    }
-
-    onSaved();
-    setRows(Array.from({ length: ROWS_COUNT }, emptyRow));
-    setRowErrors(Array.from({ length: ROWS_COUNT }, () => false));
-    descrizioneRef.current?.focus();
+  const addRiga = () => {
+    setRighe([...righe, rigaVuota()]);
   };
 
-  const renderRow = (row: Row, i: number) => {
-    const error = rowErrors[i];
+  const removeRiga = (index: number) => {
+    if (righe.length <= 2) return;
+    setRighe(righe.filter((_, i) => i !== index));
+  };
 
-    return (
-      <Stack key={i} direction="row" spacing={2} alignItems="center">
-        <TextField
-          type="date"
-          size="small"
-          sx={{ width: 150 }}
-          value={row.data}
-          onChange={(e) =>
-            updateRow(i, (r) => ({ ...r, data: e.target.value }))
-          }
-        />
+  const save = async (e?: React.FormEvent) => {
+    e?.preventDefault();
 
-        <TextField
-          label="Descrizione"
-          size="small"
-          sx={{ width: 260 }}
-          inputRef={i === 0 ? descrizioneRef : undefined}
-          value={row.descrizione}
-          onChange={(e) =>
-            updateRow(i, (r) => ({
-              ...r,
-              descrizione: e.target.value,
-            }))
-          }
-        />
+    if (!isQuadraturaOk || !isFormCompleto) return;
 
-        <Autocomplete
-          size="small"
-          sx={{ width: 200 }}
-          options={mastrini}
-          value={row.conto_dare}
-          getOptionLabel={(o: any) => o?.label || o?.nome || ""}
-          onChange={(_, v) => updateRow(i, (r) => ({ ...r, conto_dare: v }))}
-          renderInput={(p) => (
-            <TextField {...p} label="Conto Dare" error={error} />
-          )}
-        />
+    // Traduciamo le due colonne (UX) nel formato che il backend si aspetta (DB)
+    const payloadRighe = righe.map((r) => ({
+      conto: r.conto.id,
+      sezione: Number(r.dare) > 0 ? "D" : "A",
+      importo: Number(r.dare) > 0 ? parseFloat(r.dare) : parseFloat(r.avere),
+    }));
 
-        <Autocomplete
-          size="small"
-          sx={{ width: 200 }}
-          options={mastrini}
-          value={row.conto_avere}
-          getOptionLabel={(o: any) => o?.label || o?.nome || ""}
-          onChange={(_, v) => updateRow(i, (r) => ({ ...r, conto_avere: v }))}
-          renderInput={(p) => (
-            <TextField {...p} label="Conto Avere" error={error} />
-          )}
-        />
+    try {
+      await api.post("/operazioni/", {
+        esercizio: esercizioId,
+        data: data,
+        descrizione: descrizione,
+        righe: payloadRighe,
+      });
 
-        <TextField
-          label="Importo"
-          type="number"
-          size="small"
-          sx={{ width: 140 }}
-          value={row.importo}
-          error={error}
-          onChange={(e) =>
-            updateRow(i, (r) => ({ ...r, importo: e.target.value }))
-          }
-        />
-
-        {i === 0 && (
-          <Button type="submit" variant="contained" sx={{ px: 3, ml: 1 }}>
-            Registra
-          </Button>
-        )}
-      </Stack>
-    );
+      onSaved();
+      setDescrizione("");
+      setRighe([rigaVuota(), rigaVuota()]);
+    } catch (error) {
+      console.error("Errore nel salvataggio", error);
+      alert("Errore durante il salvataggio dell'operazione");
+    }
   };
 
   return (
     <Card elevation={2}>
       <CardContent>
         <form onSubmit={save}>
-          <Stack spacing={2}>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  size="small"
-                  checked={multi}
-                  onChange={(e) => setMulti(e.target.checked)}
-                />
-              }
-              label="Multiscrittura"
-            />
+          <Stack spacing={3}>
+            {/* Testata */}
+            <Stack direction="row" spacing={2} alignItems="center">
+              <TextField
+                type="date"
+                label="Data"
+                size="small"
+                InputLabelProps={{ shrink: true }}
+                value={data}
+                onChange={(e) => setData(e.target.value)}
+                sx={{ width: 150 }}
+              />
+              <TextField
+                label="Descrizione Operazione"
+                size="small"
+                fullWidth
+                value={descrizione}
+                onChange={(e) => setDescrizione(e.target.value)}
+                placeholder="es. Pagamento fornitore con bonifico"
+              />
+            </Stack>
 
-            {renderRow(rows[0], 0)}
+            <Divider />
 
-            <Collapse in={multi} timeout={250}>
-              <Stack spacing={2} mt={2}>
-                {rows.slice(1).map((row, i) => renderRow(row, i + 1))}
-              </Stack>
-            </Collapse>
+            {/* Intestazioni Colonne Righe */}
+            <Stack direction="row" spacing={2} sx={{ px: 1 }}>
+              <Typography
+                variant="caption"
+                color="textSecondary"
+                sx={{ flexGrow: 1 }}
+              >
+                CONTO
+              </Typography>
+              <Typography
+                variant="caption"
+                color="textSecondary"
+                sx={{ width: 120, textAlign: "center" }}
+              >
+                DARE €
+              </Typography>
+              <Typography
+                variant="caption"
+                color="textSecondary"
+                sx={{ width: 120, textAlign: "center" }}
+              >
+                AVERE €
+              </Typography>
+              <Box sx={{ width: 40 }} /> {/* Spazio per il cestino */}
+            </Stack>
+
+            {/* Righe dell'Operazione */}
+            <Stack spacing={1.5}>
+              {righe.map((riga, i) => (
+                <Stack key={i} direction="row" spacing={2} alignItems="center">
+                  <Autocomplete
+                    size="small"
+                    sx={{ flexGrow: 1 }} // Il conto si prende tutto lo spazio disponibile
+                    options={mastrini}
+                    value={riga.conto}
+                    getOptionLabel={(o: any) => o?.label || o?.nome || ""}
+                    isOptionEqualToValue={(option: any, value: any) =>
+                      option?.id === value?.id
+                    }
+                    onChange={(_, v) => updateRiga(i, "conto", v)}
+                    renderInput={(p) => (
+                      <TextField {...p} placeholder="Cerca conto..." />
+                    )}
+                  />
+
+                  <TextField
+                    placeholder="0.00"
+                    type="number"
+                    size="small"
+                    sx={{ width: 120 }}
+                    value={riga.dare}
+                    onChange={(e) => updateRiga(i, "dare", e.target.value)}
+                    inputProps={{ style: { textAlign: "right" } }} // Allinea i numeri a destra
+                  />
+
+                  <TextField
+                    placeholder="0.00"
+                    type="number"
+                    size="small"
+                    sx={{ width: 120 }}
+                    value={riga.avere}
+                    onChange={(e) => updateRiga(i, "avere", e.target.value)}
+                    inputProps={{ style: { textAlign: "right" } }}
+                  />
+
+                  <IconButton
+                    color="error"
+                    onClick={() => removeRiga(i)}
+                    disabled={righe.length <= 2}
+                    sx={{ width: 40 }}
+                  >
+                    <DeleteIcon />
+                  </IconButton>
+                </Stack>
+              ))}
+            </Stack>
+
+            {/* Footer con Totali e Bottoni */}
+            <Stack
+              direction="row"
+              justifyContent="space-between"
+              alignItems="center"
+              sx={{ pt: 1 }}
+            >
+              <Button
+                startIcon={<AddIcon />}
+                onClick={addRiga}
+                variant="text"
+                size="small"
+              >
+                Aggiungi Riga
+              </Button>
+
+              <Box display="flex" alignItems="center" gap={3}>
+                <Typography
+                  variant="body1"
+                  color={totDare !== totAvere ? "error" : "textSecondary"}
+                >
+                  Tot. Dare: <strong>{totDare.toFixed(2)}</strong> | Tot. Avere:{" "}
+                  <strong>{totAvere.toFixed(2)}</strong>
+                </Typography>
+                <Button
+                  type="submit"
+                  variant="contained"
+                  disabled={!isQuadraturaOk || !isFormCompleto}
+                >
+                  Registra Operazione
+                </Button>
+              </Box>
+            </Stack>
           </Stack>
         </form>
       </CardContent>
     </Card>
   );
 }
-
-// import { useRef, useState } from "react";
-// import {
-//   Card,
-//   CardContent,
-//   Stack,
-//   TextField,
-//   Button,
-//   Autocomplete,
-// } from "@mui/material";
-// import api from "../../api";
-
-// export default function ScritturaForm({ mastrini, esercizioId, onSaved }: any) {
-//   /**
-//    * Stato del form
-//    * - data inizializzata a oggi
-//    * - conti null per forzare selezione esplicita
-//    */
-//   const [form, setForm] = useState({
-//     data: new Date().toISOString().split("T")[0],
-//     descrizione: "",
-//     conto_dare: null as any,
-//     conto_avere: null as any,
-//     importo: "",
-//   });
-
-//   /**
-//    * Refs per gestione focus progressivo
-//    * Permette una compilazione rapida solo da tastiera
-//    */
-//   const descrizioneRef = useRef<HTMLInputElement>(null);
-//   const dareRef = useRef<HTMLInputElement>(null);
-//   const avereRef = useRef<HTMLInputElement>(null);
-//   const importoRef = useRef<HTMLInputElement>(null);
-
-//   /**
-//    * Validazione UX:
-//    * impedisce che Dare e Avere siano lo stesso conto
-//    */
-//   const sameAccount =
-//     form.conto_dare &&
-//     form.conto_avere &&
-//     form.conto_dare.id === form.conto_avere.id;
-
-//   /**
-//    * Salvataggio scrittura
-//    * - bloccato se mancano dati obbligatori
-//    * - bloccato se Dare === Avere
-//    * - reset parziale del form per inserimenti seriali
-//    */
-//   const save = async (e?: any) => {
-//     e?.preventDefault();
-
-//     if (!form.conto_dare || !form.conto_avere || !form.importo || sameAccount)
-//       return;
-
-//     await api.post("/scritture/", {
-//       esercizio: esercizioId,
-//       data: form.data,
-//       descrizione: form.descrizione,
-//       conto_dare: form.conto_dare.id,
-//       conto_avere: form.conto_avere.id,
-//       importo: form.importo,
-//     });
-
-//     onSaved();
-
-//     // Reset mirato: manteniamo data e focus per inserimento rapido
-//     setForm((f) => ({
-//       ...f,
-//       descrizione: "",
-//       importo: "",
-//       conto_dare: null,
-//       conto_avere: null,
-//     }));
-
-//     // UX: dopo il salvataggio si riparte subito dalla descrizione
-//     descrizioneRef.current?.focus();
-//   };
-
-//   return (
-//     <Card elevation={2}>
-//       <CardContent>
-//         <form onSubmit={save}>
-//           <Stack direction="row" spacing={2} alignItems="center">
-//             {/*
-//               Data
-//               - Enter sposta il focus sulla descrizione
-//             */}
-//             <TextField
-//               type="date"
-//               label="Data"
-//               InputLabelProps={{ shrink: true }}
-//               size="small"
-//               sx={{ width: 150 }}
-//               value={form.data}
-//               onChange={(e) => setForm({ ...form, data: e.target.value })}
-//               onKeyDown={(e) =>
-//                 e.key === "Enter" && descrizioneRef.current?.focus()
-//               }
-//             />
-
-//             {/*
-//               Descrizione
-//               - Campo libero
-//               - Enter porta al conto Dare
-//             */}
-//             <TextField
-//               label="Descrizione"
-//               size="small"
-//               sx={{ width: 250 }}
-//               inputRef={descrizioneRef}
-//               value={form.descrizione}
-//               onChange={(e) =>
-//                 setForm({ ...form, descrizione: e.target.value })
-//               }
-//               onKeyDown={(e) => e.key === "Enter" && dareRef.current?.focus()}
-//             />
-
-//             {/*
-//               Conto Dare
-//               Feature UX:
-//               - autoHighlight: primo risultato evidenziato
-//               - Enter seleziona subito il primo conto
-//               - Dopo la selezione focus automatico su Avere
-//             */}
-//             <Autocomplete
-//               autoHighlight
-//               size="small"
-//               sx={{ width: 200 }}
-//               options={mastrini}
-//               getOptionLabel={(o: any) => o.label || o.nome || ""}
-//               value={form.conto_dare}
-//               onChange={(_, v) => {
-//                 setForm({ ...form, conto_dare: v });
-//                 avereRef.current?.focus();
-//               }}
-//               renderInput={(p) => (
-//                 <TextField
-//                   {...p}
-//                   label="Conto Dare"
-//                   inputRef={dareRef}
-//                   error={sameAccount}
-//                 />
-//               )}
-//             />
-
-//             {/*
-//               Conto Avere
-//               Feature UX:
-//               - autoHighlight come Dare
-//               - Validazione immediata Dare ≠ Avere
-//               - Feedback visivo tramite error + helperText
-//             */}
-//             <Autocomplete
-//               autoHighlight
-//               size="small"
-//               sx={{ width: 200 }}
-//               options={mastrini}
-//               getOptionLabel={(o: any) => o.label || o.nome || ""}
-//               value={form.conto_avere}
-//               onChange={(_, v) => {
-//                 setForm({ ...form, conto_avere: v });
-//                 importoRef.current?.focus();
-//               }}
-//               renderInput={(p) => (
-//                 <TextField
-//                   {...p}
-//                   label="Conto Avere"
-//                   inputRef={avereRef}
-//                   error={sameAccount}
-//                   // helperText={
-//                   //   sameAccount ? "Dare e Avere non possono coincidere" : ""
-//                   // }
-//                 />
-//               )}
-//             />
-
-//             {/*
-//               Importo
-//               - Enter esegue il salvataggio
-//               - Pensato per inserimenti rapidi consecutivi
-//             */}
-//             <TextField
-//               label="Importo"
-//               type="number"
-//               size="small"
-//               sx={{ width: 150 }}
-//               inputRef={importoRef}
-//               value={form.importo}
-//               onChange={(e) => setForm({ ...form, importo: e.target.value })}
-//               // onKeyDown={(e) => e.key === "Enter" && save()} ❌ rimosso onKeyDown
-//             />
-
-//             {/*
-//               Pulsante Registra
-//               - Disabilitato in caso di errore contabile
-//             */}
-//             <Button
-//               type="submit"
-//               variant="contained"
-//               sx={{ px: 3 }}
-//               disabled={sameAccount}
-//             >
-//               Registra
-//             </Button>
-//           </Stack>
-//         </form>
-//       </CardContent>
-//     </Card>
-//   );
-// }

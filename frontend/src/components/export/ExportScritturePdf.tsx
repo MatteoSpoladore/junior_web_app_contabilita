@@ -15,28 +15,76 @@ export default function ExportScritturePDF({ scritture, esercizio }: any) {
 
     // Titolo
     doc.setFontSize(15);
-    doc.text(`Scritture contabili - ${esercizio.nome}`, 14, 15);
+    doc.text(`Libro Giornale - ${esercizio.nome}`, 14, 15);
 
     // Utente
     doc.setFontSize(10);
     doc.text(`Utente: ${username}`, 14, 20);
 
+    // Costruiamo il body della tabella gestendo il rowSpan per le scritture composte
+    const tableBody: any[] = [];
+
+    scritture.forEach((op: any) => {
+      const righeCount = op.righe?.length || 1;
+
+      op.righe?.forEach((riga: any, index: number) => {
+        const isDare = riga.sezione === "D";
+        const isAvere = riga.sezione === "A";
+        const rowData: any[] = [];
+
+        // Inseriamo Data e Descrizione SOLO nella prima riga dell'operazione,
+        // e diciamo ad autotable di unire le celle verticalmente (rowSpan)
+        if (index === 0) {
+          rowData.push({
+            content: new Date(op.data).toLocaleDateString("it-IT"),
+            rowSpan: righeCount,
+            styles: { valign: "top" },
+          });
+          rowData.push({
+            content: op.descrizione,
+            rowSpan: righeCount,
+            styles: { valign: "top" },
+          });
+        }
+
+        // Colonna Conto (indentata e in corsivo se è in Avere)
+        rowData.push({
+          content: isAvere
+            ? `      ${riga.conto_nome || "N/A"}`
+            : riga.conto_nome || "N/A",
+          styles: {
+            fontStyle: isAvere ? "normal" : "normal",
+            textColor: isAvere ? 0 : 0, // Grigio scuro per l'Avere
+          },
+        });
+
+        // Colonna Dare
+        rowData.push({
+          content: isDare ? Number(riga.importo).toFixed(2) : "",
+          styles: { fontStyle: isDare ? "normal" : "normal" },
+        });
+
+        // Colonna Avere
+        rowData.push({
+          content: isAvere ? Number(riga.importo).toFixed(2) : "",
+          styles: { fontStyle: isAvere ? "normal" : "normal" },
+        });
+
+        tableBody.push(rowData);
+      });
+    });
+
+    // Generazione Tabella
     autoTable(doc, {
       startY: 26,
-      head: [
-        ["Data", "Descrizione", "Conto Dare", "Conto Avere", "Importo (€)"],
-      ],
-      body: scritture.map((s: any) => [
-        s.data,
-        s.descrizione,
-        s.conto_dare_nome,
-        s.conto_avere_nome,
-        Number(s.importo).toFixed(2),
-      ]),
+      head: [["Data", "Descrizione", "Conto", "Dare (€)", "Avere (€)"]],
+      body: tableBody,
       styles: {
         fontSize: 8,
         cellPadding: 2,
         overflow: "linebreak",
+        lineColor: [200, 200, 200],
+        lineWidth: 0.1,
       },
       headStyles: {
         fillColor: [230, 230, 230],
@@ -44,21 +92,21 @@ export default function ExportScritturePDF({ scritture, esercizio }: any) {
         fontStyle: "bold",
       },
       columnStyles: {
-        0: { cellWidth: 25 }, // Data
-        1: { cellWidth: 55 }, // Descrizione
-        2: { cellWidth: 40 }, // Dare
-        3: { cellWidth: 40 }, // Avere
-        4: { cellWidth: 25, halign: "right" }, // Importo
+        0: { cellWidth: 20 }, // Data
+        1: { cellWidth: 45 }, // Descrizione
+        2: { cellWidth: 70 }, // Conto
+        3: { cellWidth: 25, halign: "right" }, // Dare
+        4: { cellWidth: 22, halign: "right" }, // Avere
       },
       margin: { left: 14, right: 14 },
     });
 
-    doc.save(`scritture_${safeEsercizio}_${safeUser}.pdf`);
+    doc.save(`libro_giornale_${safeEsercizio}_${safeUser}.pdf`);
   };
 
   return (
     <Button variant="outlined" onClick={exportPDF}>
-      Esporta Scritture
+      Stampa Libro Giornale
     </Button>
   );
 }

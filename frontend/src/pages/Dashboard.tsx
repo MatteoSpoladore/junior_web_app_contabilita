@@ -59,7 +59,7 @@ export default function Dashboard({
   }, [id, propEsercizio]);
 
   // 2. Passiamo l'ID all'hook dei Mastrini/Scritture
-  const { scritture, mastrini, isLoading, error, refresh } = useContabilita(
+  const { operazione, mastrini, isLoading, error, refresh } = useContabilita(
     esercizio?.id,
   );
 
@@ -120,7 +120,7 @@ export default function Dashboard({
             {showBilancio ? "Scritture" : "Mastrini"}
           </Button>
           {esercizio && (
-            <ExportScritturePDF scritture={scritture} esercizio={esercizio} />
+            <ExportScritturePDF scritture={operazione} esercizio={esercizio} />
           )}
           {esercizio && (
             <ExportMastriniPDF mastrini={mastrini} esercizio={esercizio} />
@@ -147,7 +147,7 @@ export default function Dashboard({
           <Fade in={!showBilancio} timeout={250} unmountOnExit>
             <Box sx={{ width: "100%", overflowX: "auto" }}>
               <ScrittureTable
-                rows={scritture}
+                rows={operazione}
                 onEdit={setEditData}
                 onDeleteComplete={refresh}
               />

@@ -1,10 +1,10 @@
 import { useState, useEffect, useCallback } from "react";
 import api from "../api";
-import type { Scrittura, Mastrino } from "../types";
+import type { Operazione, Mastrino } from "../types";
 
 export function useContabilita(esercizioId: number | null | undefined) {
   // Ora TypeScript sa esattamente cosa c'è dentro questi array
-  const [scritture, setScritture] = useState<Scrittura[]>([]);
+  const [operazione, setOperazione] = useState<Operazione[]>([]);
   const [mastrini, setMastrini] = useState<Mastrino[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -17,11 +17,11 @@ export function useContabilita(esercizioId: number | null | undefined) {
     setError(null);
     try {
       // Esecuzione parallela delle chiamate API per dimezzare i tempi di attesa
-      const [resScritture, resMastrini] = await Promise.all([
-        api.get(`/scritture/?esercizio=${esercizioId}`),
+      const [resOperazioni, resMastrini] = await Promise.all([
+        api.get(`/operazioni/?esercizio=${esercizioId}`),
         api.get(`/mastrini/?esercizio=${esercizioId}`),
       ]);
-      setScritture(resScritture.data);
+      setOperazione(resOperazioni.data);
       setMastrini(resMastrini.data);
     } catch (err: any) {
       setError("Errore durante il recupero dei dati contabili.");
@@ -36,5 +36,5 @@ export function useContabilita(esercizioId: number | null | undefined) {
     refresh();
   }, [refresh]);
 
-  return { scritture, mastrini, isLoading, error, refresh };
+  return { operazione, mastrini, isLoading, error, refresh };
 }

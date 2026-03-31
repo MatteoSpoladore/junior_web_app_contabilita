@@ -16,12 +16,19 @@ export interface Mastrino {
   saldo: string | number;
 }
 
-export interface Scrittura {
+export interface RigaOperazione {
+  id?: number;
+  conto: number; // ID del mastrino
+  conto_nome?: string;
+  sezione: "D" | "A";
+  importo: number | string;
+}
+
+export interface Operazione {
   id: number;
   data: string;
   descrizione: string;
-  importo: string | number;
-  conto_dare: number;
-  conto_avere: number;
   esercizio: number;
+  righe: RigaOperazione[];
+  created_at?: string;
 }
